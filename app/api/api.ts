@@ -5,14 +5,13 @@
 
 // const API_BASE_URL = 'http://localhost:5000';
 
-let API_BASE_URL;
+let API_BASE_URL: string; 
 
 if (process.env.NODE_ENV === "production") {
   API_BASE_URL = "https://back-end-erp-production.up.railway.app";
 } else {
   API_BASE_URL = "http://localhost:5000";
 }
-
 
 const api = async (
   endpoint: string,
