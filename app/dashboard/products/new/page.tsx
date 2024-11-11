@@ -11,6 +11,8 @@ export default function App() {
     marca: string;
     quantidadeEstoque: number;
     valorVenda: string;
+    valorCompra: string;
+    observacoes: string;
   }
 
   const [nomeProduto, setNomeproduto] = useState('');

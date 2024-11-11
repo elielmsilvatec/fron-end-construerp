@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils"; // Substitua por sua função 'cn' para concatenar classes
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -12,11 +12,7 @@ const sidebarItems = [
   { icon: "bi bi-cart-fill", label: "Pedidos", href: "/dashboard/orders" },
   { icon: "bi bi-cash-stack", label: "Vendas", href: "/dashboard/sales" },
   { icon: "bi bi-truck", label: "Entregas", href: "/dashboard/deliveries" },
-  {
-    icon: "bi bi-clipboard-check",
-    label: "Relatórios",
-    href: "/dashboard/reports",
-  },
+  { icon: "bi bi-clipboard-check", label: "Relatórios", href: "/dashboard/reports" },
   { icon: "bi bi-cash-stack", label: "Financeiro", href: "/dashboard/finance" },
   { icon: "bi bi-people-fill", label: "Users", href: "/dashboard/users" },
   { icon: "bi bi-gear-fill", label: "Settings", href: "/dashboard/settings" },
@@ -24,12 +20,35 @@ const sidebarItems = [
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+      if (window.innerWidth > 768) {
+        setCollapsed(false);
+      } else {
+        setCollapsed(true);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    // Verifique o tamanho da tela ao carregar a página
+    setIsMobile(window.innerWidth <= 768);
+    setCollapsed(window.innerWidth <= 768);
+  }, []);
 
   return (
     <div
       className={cn(
-        "relative flex flex-col border-r bg-dark-blue text-white h-screen", // Ajustado para azul escuro e texto branco
+        "relative flex flex-col border-r bg-dark-blue text-white",
+        "h-screen",
         collapsed ? "w-16" : "w-64",
         "transition-width duration-200 ease-in-out"
       )}

@@ -58,7 +58,9 @@ export default function ProductList() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<>
+
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {products.map((product) => (
         <Card key={product.id} className="hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center space-x-4 pb-2">
@@ -82,5 +84,36 @@ export default function ProductList() {
         </div>
       )}
     </div>
+    -------------------------------------------------------------------------------
+
+ 
+      <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        {products.map((product) => (
+          <div key={product.id} className="col">
+            <div className="card h-100 shadow-sm">
+              <div className="card-header d-flex align-items-center">
+                <i className="bi bi-box-seam text-primary me-3"></i>
+                <h5 className="card-title mb-0">{product.id}</h5>
+              </div>
+              <div className="card-body">
+                <p className="text-muted mb-2">{product.nomeProduto}</p>
+                <p className="text-success fw-bold">
+                  {new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                  }).format(product.valorVenda)}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+        {products.length === 0 && (
+          <div className="col-12 text-center py-4 text-muted">
+            Nenhum produto encontrado
+          </div>
+        )}
+      </div>
+ 
+</>
   );
 }

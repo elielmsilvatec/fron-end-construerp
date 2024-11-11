@@ -15,7 +15,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const sessionUser = await checkSession();
       setUser(sessionUser);
 
-      if (!sessionUser && pathname !== '/login/login') {
+      // definindo rotas publicas
+      if (!sessionUser && pathname !== '/login/login' && pathname !== '/login/create') {
         router.replace('/login/login');
       } else if (sessionUser && pathname === '/login/login') {
         router.replace('/dashboard');
