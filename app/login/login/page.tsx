@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { Toaster, toast } from 'sonner';
 import { useAuth } from "@/lib/auth";
 import Link from "next/link"
 import api from "@/app/api/api";
@@ -29,7 +29,7 @@ export default function LoginPage() {
 
       const data = await res.json();
 
-      if (res.ok) {
+      if (data.user && data.message == "Login bem-sucedido") {
         setUser(data.user);
         toast.success("Login realizado com sucesso!");
         router.push("/dashboard");
@@ -37,7 +37,9 @@ export default function LoginPage() {
         toast.error(data.message || "Erro ao fazer login");
       }
     } catch (error) {
-      toast.error("Erro ao conectar com o servidor");
+      toast.error("Erro ao conectar com o servidor", {
+        duration: 5000 // Ajuste a duração para 5 segundos
+      });
     } finally {
       setIsLoading(false);
     }
@@ -53,6 +55,10 @@ export default function LoginPage() {
            
             <h2 className="text-center mb-4">Faça seu Login</h2>{" "}
            
+           {/* mensagens Toast */}
+            <Toaster />
+    
+
             <form onSubmit={handleSubmit}>
              
               <div className="mb-3">

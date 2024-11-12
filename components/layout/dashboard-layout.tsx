@@ -14,17 +14,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     async function verifySession() {
-    const  teste = setUser
-    console.log("Tetse --:>>> ", teste)
-      const user = await checkSession();
-    
+      const user = await checkSession();    
       if( user === null){
         router.push('/login/login');
         console.log("Usuario"  ,  user)
       }
       if (user) {
-        setUser(user);
-      
+        setUser(user);      
       } else {
         toast.error('Não autorizado, redirecionando para login');
         router.push('/login/login');

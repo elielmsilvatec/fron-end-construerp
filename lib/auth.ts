@@ -22,8 +22,8 @@ export async function checkSession() {
     const res = await api('/session-info', {
 
     });
-    
-    if (!res.ok) {
+
+    if (!res.ok && res.status != 200 ) {
       // throw new Error('Não autorizado');  
       return null;   
     }
