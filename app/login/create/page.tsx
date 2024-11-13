@@ -7,14 +7,16 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Toaster, toast } from 'sonner';
+import Alert from "@mui/material/Alert";
+import CheckIcon from "@mui/icons-material/Check";
 
 export default function CadastroPage() {
   const router = useRouter();
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [mensagem, setErrorMessage] = useState("");
-
+  const [erroMsg, setErrorMessage] = useState("");
+  const [msgSucess, setMsgsucess] = useState("");
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -43,7 +45,7 @@ export default function CadastroPage() {
       });
 
       if (response.status === 200) {
-        setErrorMessage("Cadastrado com sucesso. Faça login!");
+        setMsgsucess("Cadastrado com sucesso. Faça login!");
 
         // Redireciona para a página de login após 2 segundos
         setTimeout(() => {
@@ -72,13 +74,18 @@ export default function CadastroPage() {
       >
         <div className="card-body">
           <h5 className="card-title text-center mb-4">Cadastro</h5>
-          {/* Exibe a mensagem de erro ou sucesso aqui */}
+          {/* Exibe a erroMsg de erro ou sucesso aqui */}
           <Toaster />
-          {mensagem && (
-            <div className="alert alert-info" role="alert">
-              {mensagem}
-            </div>
+          {erroMsg && (
+          <Alert severity="error"> {erroMsg}</Alert>             
           )}
+
+          {msgSucess && (
+            <Alert icon={<CheckIcon fontSize="inherit" />} severity="success">
+              {msgSucess}
+            </Alert>
+          )}
+
           <form onSubmit={handleLogin}>
             <div className="mb-3">
               <label htmlFor="nomeCadastro" className="form-label">

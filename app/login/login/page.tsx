@@ -6,12 +6,14 @@ import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 import Link from "next/link";
 import api from "@/app/api/api";
+import Alert from "@mui/material/Alert";
+// import CheckIcon from "@mui/icons-material/Check";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [mensagem, setMensagem] = useState("");
+  const [erroMsg, setMensagem] = useState("");
   const router = useRouter();
   const { setUser } = useAuth();
 
@@ -52,11 +54,14 @@ export default function LoginPage() {
           <div className="card-body">
             <h2 className="text-center mb-4">Faça seu Login</h2>{" "}
             {/* Exibe a mensagem de erro ou sucesso aqui */}
-            {mensagem && (
-              <div className="alert alert-info" role="alert">
-                {mensagem}
-              </div>
-            )}
+            {erroMsg && (
+          <Alert severity="error"> {erroMsg}</Alert>             
+          )}
+
+
+
+
+            {/* Formulário */}
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
                 <label htmlFor="inputEmail" className="form-label">

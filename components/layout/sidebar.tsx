@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 const sidebarItems = [
   { icon: "bi bi-grid-fill", label: "Dashboard", href: "/dashboard" },
   { icon: "bi bi-box-seam", label: "Produtos", href: "/dashboard/products/list" },
-  { icon: "bi bi-people-fill", label: "Clientes", href: "/dashboard/clients" },
+  { icon: "bi bi-people-fill", label: "Clientes", href: "/dashboard/clients/list" },
   { icon: "bi bi-cart-fill", label: "Pedidos", href: "/dashboard/orders" },
   { icon: "bi bi-cash-stack", label: "Vendas", href: "/dashboard/sales" },
   { icon: "bi bi-truck", label: "Entregas", href: "/dashboard/deliveries" },
