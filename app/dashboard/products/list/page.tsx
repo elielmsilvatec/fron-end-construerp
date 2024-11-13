@@ -14,7 +14,7 @@ export default function App() {
       <p>
       <Link href="/dashboard/products/new"> New Cadastro Novo </Link>{" "}
       </p>
-      <Link href="/dashboard/products/pag"> Pagina pag Testes</Link>
+
       
 
       <ProductList />
