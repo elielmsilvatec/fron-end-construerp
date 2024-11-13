@@ -134,7 +134,7 @@ export default function CadastroPage() {
           </form>
 
           <div className="text-center mt-3">
-            <Link href="/pages/login/login">← Voltar para o login</Link>
+            <Link href="/login/login">← Voltar para o login</Link>
           </div>
         </div>
       </div>

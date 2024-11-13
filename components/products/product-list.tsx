@@ -1,8 +1,14 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, Edit } from "lucide-react";
+import {
+  Package,
+  Edit,
+  AlignRight,
+  ExternalLink,
+  ExternalLinkIcon,
+} from "lucide-react";
 import api from "@/app/api/api";
 import { useRouter } from "next/navigation";
 
@@ -11,7 +17,7 @@ interface Product {
   nomeProduto: string;
   descricao: string;
   valorVenda: number;
-  quantidadeEstoque: string
+  quantidadeEstoque: string;
 }
 
 export default function ProductList() {
@@ -51,10 +57,10 @@ export default function ProductList() {
         const response = await api("/produto/buscar", {
           method: "POST",
           body: JSON.stringify({
-            buscarProduto: searchTerm 
+            buscarProduto: searchTerm,
           }),
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         });
 
@@ -97,7 +103,6 @@ export default function ProductList() {
     }
   }, [searchTerm]);
 
-
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
@@ -129,9 +134,8 @@ export default function ProductList() {
           onChange={handleSearchChange}
           autoFocus
         />
-        
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {products.map((product) => (
           <Card key={product.id} className="hover:shadow-lg transition-shadow">
@@ -143,14 +147,20 @@ export default function ProductList() {
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 mb-2">{product.descricao}</p>
-              <p className="text-gray-400 mb-2">Estoque: {product.quantidadeEstoque}</p>
-              <p className="text-lg font-bold text-green-600">       
+              <p className="text-gray-400 mb-2">
+                Estoque: {product.quantidadeEstoque}
+              </p>
+              <p className="text-lg font-bold text-green-600">
                 {new Intl.NumberFormat("pt-BR", {
                   style: "currency",
                   currency: "BRL",
                 }).format(product.valorVenda)}
               </p>
-              <Edit className="text-blue-500" />
+              <div className="flex flex-col justify-center items-center"> 
+              <a href={`/dashboard/products/view/${product.id}`}>
+              <ExternalLink className="text-blue-500" />
+              </a>
+              </div>
             </CardContent>
           </Card>
         ))}
