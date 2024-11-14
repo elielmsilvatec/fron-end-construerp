@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { Toaster, toast } from 'sonner';
 import Alert from "@mui/material/Alert";
 import CheckIcon from "@mui/icons-material/Check";
+import Success from "@/components/sweetalert2/success"
 
 export default function CadastroPage() {
   const router = useRouter();
@@ -46,11 +47,11 @@ export default function CadastroPage() {
 
       if (response.status === 200) {
         setMsgsucess("Cadastrado com sucesso. Faça login!");
-
+      
         // Redireciona para a página de login após 2 segundos
         setTimeout(() => {
           window.location.href = "/login/login";
-        }, 2000);
+        }, 3000);
       } else {
         // Tratar erros específicos do backend
         if (response.status === 500) {
@@ -84,7 +85,10 @@ export default function CadastroPage() {
             <Alert icon={<CheckIcon fontSize="inherit" />} severity="success">
               {msgSucess}
             </Alert>
+        
           )}
+
+        
 
           <form onSubmit={handleLogin}>
             <div className="mb-3">

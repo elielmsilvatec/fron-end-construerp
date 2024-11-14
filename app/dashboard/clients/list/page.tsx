@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
-import ProductList from "@/components/product-list";
+
 
 import Alert from "@mui/material/Alert";
 import CheckIcon from "@mui/icons-material/Check";
