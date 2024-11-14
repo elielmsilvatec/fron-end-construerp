@@ -1,22 +1,17 @@
-'use client';
-import Link from "next/link"
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth';
-import ProductList from '@/components/product-list';
+"use client";
+import Link from "next/link";
+import ProductList from "@/components/products/product-list";
+
+import NewProduct from "@/components/products/new-product";
 
 export default function App() {
-
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-8">Produtos</h1>
+    <div>
+      <h1 className="text-2xl font-bold  ">Produtos</h1>
+      <NewProduct /> <br />
       <p>
-      <Link href="/dashboard/products/new"> New Cadastro Novo </Link>{" "}
+        <Link href="/dashboard/products/new"> New Cadastro Novo </Link>{" "}
       </p>
-
-      
-
       <ProductList />
     </div>
   );

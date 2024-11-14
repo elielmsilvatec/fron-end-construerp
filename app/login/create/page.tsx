@@ -75,7 +75,7 @@ export default function CadastroPage() {
         <div className="card-body">
           <h5 className="card-title text-center mb-4">Cadastro</h5>
           {/* Exibe a erroMsg de erro ou sucesso aqui */}
-          <Toaster />
+          {/* <Toaster /> */}
           {erroMsg && (
           <Alert severity="error"> {erroMsg}</Alert>             
           )}

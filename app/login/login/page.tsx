@@ -132,7 +132,6 @@ export default function LoginPage() {
               <div className="text-center mt-3">
                 <Link href="/login/create"> Cadastre-se</Link>{" "}
               </div>{" "}
-              <p>Email: teste@gmail.com</p> <p>Senha: 123</p>{" "}
             </div>{" "}
           </div>{" "}
         </div>{" "}
