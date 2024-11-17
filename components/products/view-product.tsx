@@ -28,11 +28,6 @@ export const ViewProduct = ({ id }: Props) => {
 
   const handleModalOpen = () => setModalOpen(true);
   const handleModalClose = () => setModalOpen(false);
-  const handleEditModalOpen = () => {
-    handleModalClose(); // Fecha o modal de visualização
-    setEditModalOpen(true); // Abre o modal de edição
-  };
-  const handleEditModalClose = () => setEditModalOpen(false);
 
   const [produto, setProduto] = useState<{
     id: number;
@@ -111,24 +106,28 @@ export const ViewProduct = ({ id }: Props) => {
                 </strong>
               </p>
               <p>Observações: {produto.observacoes}</p>
+              {/* adicioar boto um a direita e um a esquerda */}
+              <div className="flex justify-between items-center w-full">
+  <button
+    onClick={handleModalClose}
+    className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+  >
+    Deletar produto
+  </button>
+  <button
+    onClick={handleModalClose}
+    className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+  >
+    Fechar
+  </button>
+</div>
 
-              <div className="flex flex-col justify-center items-center">
-                <button
-                  onClick={handleModalClose}
-                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                >
-                  Fechar
-                </button>
-              </div>
-             
             </>
           ) : (
             <p>Carregando...</p>
           )}
         </Box>
       </Modal>
-
-    
     </>
   );
 };
