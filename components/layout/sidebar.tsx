@@ -9,11 +9,11 @@ const sidebarItems = [
   { icon: "bi bi-grid-fill", label: "Dashboard", href: "/dashboard" },
   { icon: "bi bi-box-seam", label: "Produtos", href: "/dashboard/products/list" },
   { icon: "bi bi-people-fill", label: "Clientes", href: "/dashboard/clients/list" },
-  { icon: "bi bi-cart-fill", label: "Pedidos", href: "/dashboard/orders" },
+  { icon: "bi bi-cart-fill", label: "Pedidos", href: "/dashboard/requests" },
   { icon: "bi bi-cash-stack", label: "Vendas", href: "/dashboard/sales" },
   { icon: "bi bi-truck", label: "Entregas", href: "/dashboard/deliveries" },
   { icon: "bi bi-clipboard-check", label: "Relatórios", href: "/dashboard/reports" },
-  { icon: "bi bi-cash-stack", label: "Financeiro", href: "/dashboard/finance" },
+  { icon: "bi bi-cash-stack", label: "Financeiro", href: "/dashboard/financial" },
   { icon: "bi bi-people-fill", label: "Users", href: "/dashboard/users" },
   { icon: "bi bi-gear-fill", label: "Settings", href: "/dashboard/settings" },
 ];

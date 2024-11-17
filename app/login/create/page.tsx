@@ -74,7 +74,8 @@ export default function CadastroPage() {
         style={{ maxWidth: "500px", width: "100%" }}
       >
         <div className="card-body">
-          <h5 className="card-title text-center mb-4">Cadastro</h5>
+          {/* <h5 className="card-title text-center mb-4">Cadastro</h5> */}
+          <h1 className="text-center mb-4 text-blue-700 " style={{ fontFamily: 'Monaco'}}> Cadastro de usuário</h1>
           {/* Exibe a erroMsg de erro ou sucesso aqui */}
           {/* <Toaster /> */}
           {erroMsg && (

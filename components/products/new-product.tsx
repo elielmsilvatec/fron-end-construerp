@@ -3,9 +3,27 @@
 import { useEffect, useState } from "react";
 import api from "@/app/api/api";
 
-import Success from "@/components/sweetalert2/success"
-import Alert from "@mui/material/Alert";
-import CheckIcon from "@mui/icons-material/Check";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Modal from "@mui/material/Modal"; // Importar o componente Modal do MUI
+
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  border: "2px solid #000",
+  boxShadow: 24,
+  p: 4,
+};
 
 export default function ProductNew() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -13,17 +31,6 @@ export default function ProductNew() {
   const handleModalClose = () => setModalOpen(false);
   const [erroMsg, setErrorMessage] = useState("");
   const [msgSucess, setMsgsucess] = useState("");
-
-  interface Produto {
-    id: number;
-    nomeProduto: string;
-    unidadeMedida: string;
-    marca: string;
-    quantidadeEstoque: number;
-    valorVenda: string;
-    valorCompra: string;
-    observacoes: string;
-  }
 
   const [nomeProduto, setNomeproduto] = useState("");
   const [marca, setMarca] = useState("");
@@ -36,6 +43,8 @@ export default function ProductNew() {
   // Função para criar novo produto
   const newProduct = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setErrorMessage(""); // Limpa a mensagem de erro antes de enviar
+    setMsgsucess(""); // Limpa a mensagem de sucesso
 
     try {
       const response = await api("/produtos/save", {
@@ -54,37 +63,37 @@ export default function ProductNew() {
         },
       });
 
-      const resp = await response.json();
-      console.log(resp)
-
-      if (response.status === 200) {
-        // 201 Created é o status esperado para criação
+      if (response.ok) {
+        // Verifica se a requisição foi bem sucedida (status 200-299)
+        const resp = await response.json();
+        console.log(resp);
         setMsgsucess("Produto criado com sucesso!");
         // Limpar os campos do formulário
-        setNomeproduto("");
-        setMarca("");
-        setUnidadeDeMedida("Unidade");
-        setQuantidade("");
-        setValorCompra("");
-        setValorVenda("");
-        setObservacoes("");
-        handleModalClose(); // Feche o modal
-      } else if (response.status === 400) {
-        // 400 Bad Request
+        limparCampos();
+        setModalOpen(false);
+      } else {
         const errorData = await response.json();
-        setErrorMessage(errorData.msg);
-      } 
-      // else {
-      //   setErrorMessage("Erro ao cadastrar produto.");
-      // }
+        setErrorMessage(errorData.msg || "Erro ao cadastrar produto."); // mensagem padrão se não existir mensagem no erro
+      }
     } catch (error) {
       console.error("Erro ao cadastrar produto:", error);
       setErrorMessage("Erro de conexão com o servidor.");
     }
   };
 
+  const limparCampos = () => {
+    setNomeproduto("");
+    setMarca("");
+    setUnidadeDeMedida("Unidade");
+    setQuantidade("");
+    setValorCompra("");
+    setValorVenda("");
+    setObservacoes("");
+  };
+
   return (
     <>
+    {/* esse botão estou usando bootstrap */}
       <button
         type="button"
         className="btn btn-primary"
@@ -93,163 +102,128 @@ export default function ProductNew() {
         <i className="bi bi-plus-square-dotted"></i> Cadastrar produto
       </button>
 
-      {/* Modal de Adicionar Novo */}
-      {modalOpen && (
-        <div
-          className="modal fade show d-block"
-          id="myModal"
-          tabIndex={-1}
-          aria-labelledby="exampleModalLabel"
-          aria-hidden="true"
-        >
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <form method="post" onSubmit={newProduct}>
-                <div className="modal-header">
-                  <h5 className="modal-title" id="exampleModalLabel">
-                    Cadastro de Produto
-                  </h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    onClick={handleModalClose}
-                    aria-label="Close"
-                  ></button>
-                </div>
-                <div className="modal-body">
-                  <div className="mb-3">
-                    {erroMsg && <Alert severity="error"> {erroMsg}</Alert>}
-
-                    {msgSucess && (
-                      <Alert
-                        icon={<CheckIcon fontSize="inherit" />}
-                        severity="success"
-                      >
-                        {msgSucess}
-                      </Alert>
-                    )}
-                    <label htmlFor="nomeProduto" className="form-label">
-                      Nome do Produto:
-                    </label>
-                    <input
-                      name="nomeProduto"
-                      type="text"
-                      className="form-control"
-                      id="nomeProduto"
-                      required
-                      autoFocus
-                      value={nomeProduto}
-                      onChange={(e) => setNomeproduto(e.target.value)}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="marca" className="form-label">
-                      Marca:
-                    </label>
-                    <input
-                      name="marca"
-                      type="text"
-                      className="form-control"
-                      id="marca"
-                      required
-                      value={marca}
-                      onChange={(e) => setMarca(e.target.value)}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="unidadeMedida" className="form-label">
-                      Unidade de Medida:
-                    </label>
-                    <select
-                      name="unidadeMedida"
-                      className="form-control"
-                      id="unidadeMedida"
-                      value={unidadeMedida} // Liga o valor do select ao estado
-                      onChange={(e) => setUnidadeDeMedida(e.target.value)} // Captura mudança
-                    >
-                      <option value="Unidade">Unidade</option>
-                      <option value="kg">kg</option>
-                      <option value="Metro">Metro</option>
-                      <option value="Litro">Litro</option>
-                      <option value="Milheiro">Milheiro</option>
-                      <option value="Pacote">Pacote</option>
-                      <option value="Saco">Saco</option>
-                      <option value="duzia">Dúzia</option>
-                    </select>
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="quantidadeEstoque" className="form-label">
-                      Quantidade em Estoque:
-                    </label>
-                    <input
-                      name="quantidadeEstoque"
-                      type="text"
-                      className="form-control"
-                      id="quantidadeEstoque"
-                      required
-                      value={quantidadeEstoque} // Liga o valor
-                      onChange={(e) => setQuantidade(e.target.value)} // Captura mudança
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="valorCompra" className="form-label">
-                      Valor de Compra:
-                    </label>
-                    <input
-                      name="valorCompra"
-                      type="text"
-                      className="form-control"
-                      id="valorCompra"
-                      required
-                      value={valorCompra} // Liga o valor
-                      onChange={(e) => setValorCompra(e.target.value)} // Captura mudança
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="valorVenda" className="form-label">
-                      Valor de Venda:
-                    </label>
-                    <input
-                      name="valorVenda"
-                      type="text"
-                      className="form-control"
-                      id="valorVenda"
-                      required
-                      value={valorVenda} // Liga o valor do select ao estado
-                      onChange={(e) => setValorVenda(e.target.value)} // Captura mudança
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="observacoes" className="form-label">
-                      Observações:
-                    </label>
-                    <textarea
-                      name="observacoes"
-                      className="form-control"
-                      rows={5}
-                      id="observacoes"
-                      value={observacoes} // Liga o valor do select ao estado
-                      onChange={(e) => setObservacoes(e.target.value)} // Captura mudança
-                    ></textarea>
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={handleModalClose}
-                  >
-                    Cancelar
-                  </button>
-                  <button type="submit" className="btn btn-primary">
+      <Modal
+        open={modalOpen}
+        onClose={handleModalClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={{ ...style, borderRadius: "16px" }}>
+        {/* {erroMsg && <p style={{ color: "red" }}>{erroMsg}</p>}
+        {msgSucess && <p style={{ color: "green" }}>{msgSucess}</p>} */}
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Cadastro de Produto
+          </Typography>
+          <form onSubmit={newProduct}>
+            {" "}
+            {/* Formulário dentro do Modal */}
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 2 }}>
+              {/* Campos do formulário (TextField, Select, etc.) - mesmos que antes, mas sem fullWidth */}
+              <TextField
+                size="small"
+                label="Nome do Produto"
+                variant="outlined"
+                fullWidth
+                value={nomeProduto}
+                onChange={(e) => setNomeproduto(e.target.value)}
+                required
+              />
+              <TextField
+              sx={{ marginTop: 1 }} // Adiciona margem superior
+                size="small"
+                label="Marca"
+                variant="outlined"
+                fullWidth
+                value={marca}
+                onChange={(e) => setMarca(e.target.value)}
+                required
+              />
+              <FormControl fullWidth size="small"   sx={{ marginTop: 1 }} >
+                <InputLabel id="unidadeMedida-label" >
+                  Unidade de Medida
+                </InputLabel>
+                <Select
+                
+                  labelId="unidadeMedida-label"
+                  id="unidadeMedida"
+                  value={unidadeMedida}
+                  label="Unidade de Medida"
+                  onChange={(e) => setUnidadeDeMedida(e.target.value)}
+                >
+                  <MenuItem value="Unidade">Unidade</MenuItem>
+                  <MenuItem value="kg">kg</MenuItem>
+                  <MenuItem value="Metro">Metro</MenuItem>
+                  <MenuItem value="Litro">Litro</MenuItem>
+                  <MenuItem value="Milheiro">Milheiro</MenuItem>
+                  <MenuItem value="Pacote">Pacote</MenuItem>
+                  <MenuItem value="Saco">Saco</MenuItem>
+                  <MenuItem value="duzia">Dúzia</MenuItem>
+                </Select>
+              </FormControl>
+              <TextField
+                sx={{ marginTop: 1 }} 
+                size="small"
+                type="number"
+                label="Quantidade em Estoque"
+                variant="outlined"
+                fullWidth
+                value={quantidadeEstoque}
+                onChange={(e) => setQuantidade(e.target.value)}
+                required
+              />
+              <TextField
+                sx={{ marginTop: 1 }} 
+                size="small"
+                type="number"
+                label="Valor de Compra"
+                variant="outlined"
+                fullWidth
+                value={valorCompra}
+                onChange={(e) => setValorCompra(e.target.value)}
+                required
+              />
+              <TextField
+                sx={{ marginTop: 1 }} 
+                size="small"
+                type="number"
+                label="Valor de Venda"
+                variant="outlined"
+                fullWidth
+                value={valorVenda}
+                onChange={(e) => setValorVenda(e.target.value)}
+                required
+              />
+              <TextField
+                sx={{ marginTop: 1 }} 
+                size="small"
+                label="Observações"
+                multiline
+                rows={4}
+                variant="outlined"
+                fullWidth
+                value={observacoes}
+                onChange={(e) => setObservacoes(e.target.value)}
+              />
+            </Box>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}
+            >
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={handleModalClose}
+              >
+                Cancelar
+              </Button>
+              {/* esse botão estou usando bootstrap    */}
+              <button type="submit" className="btn btn-primary">
                     Salvar
                   </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
+            </Box>
+          </form>
+         
+        </Box>
+      </Modal>
     </>
   );
 }

@@ -2,20 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Package,
-  Edit,
-  AlignRight,
-  ExternalLink,
-  ExternalLinkIcon,
-} from "lucide-react";
+import { Package, ExternalLink } from "lucide-react";
 import api from "@/app/api/api";
 import { useRouter } from "next/navigation";
+import { ViewProduct } from "./view-product";
+import EditProduct from "./edit-product";
 
 interface Product {
   id: number;
   nomeProduto: string;
-  descricao: string;
+  observacoes: string;
   valorVenda: number;
   quantidadeEstoque: string;
 }
@@ -107,13 +103,6 @@ export default function ProductList() {
     setSearchTerm(e.target.value);
   };
 
-  // if (isLoading) {
-  //   return (
-  //     <div className="flex justify-center items-center min-h-[200px]">
-  //       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-  //     </div>
-  //   );
-  // }
 
   if (error) {
     return (
@@ -146,7 +135,7 @@ export default function ProductList() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 mb-2">{product.descricao}</p>
+              <p className="text-gray-600 mb-2">{product.observacoes}</p>
               <p className="text-gray-400 mb-2">
                 Estoque: {product.quantidadeEstoque}
               </p>
@@ -156,10 +145,11 @@ export default function ProductList() {
                   currency: "BRL",
                 }).format(product.valorVenda)}
               </p>
-              <div className="flex flex-col justify-center items-center"> 
-              <a href={`/dashboard/products/view/${product.id}`}>
-              <ExternalLink className="text-blue-500" />
-              </a>
+       
+              {/* essa div abaixo é para adicionar os botões um ao lado do outro */}
+              <div className="flex flex-row justify-center items-center gap-4">
+                <EditProduct id={product.id} />
+                <ViewProduct id={product.id} />
               </div>
             </CardContent>
           </Card>
