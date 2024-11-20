@@ -5,8 +5,8 @@ import api from "@/app/api/api";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import { ExternalLink } from "lucide-react";
-import ConfirmAction from "@/components/sweetalert2/confirm"; // Componente de confirmação
 import { useRouter } from 'next/navigation';
+import Swal from "sweetalert2";
 
 const style = {
   position: "absolute",
@@ -29,7 +29,6 @@ type Props = {
 export const ViewProduct = ({ id,  updateProductList }: Props) => {
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
   const [produto, setProduto] = useState<{
     id: number;
     nomeProduto: string;
@@ -46,9 +45,21 @@ export const ViewProduct = ({ id,  updateProductList }: Props) => {
 
   // Função de deletar produto
   const deletProduct = async () => {
+    setModalOpen(false); // Fecha o modal
+    const confirmation = await Swal.fire({
+      title: "Tem certeza?",
+      text: "Esta ação não pode ser desfeita.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sim, deletar!",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+    });
+    if (confirmation.isConfirmed) {
     try {
       const response = await api(`/produtos/del/${id}`, { method: "DELETE" });
-      if (response.ok) {
+      if (response.status === 200) {
         updateProductList(id); // Atualiza a lista localmente no componente pai
         setModalOpen(false); // Fecha o modal
       } else {
@@ -58,17 +69,7 @@ export const ViewProduct = ({ id,  updateProductList }: Props) => {
     } catch (error) {
       console.error("Erro:", error);
     }
-  };
-
-  const handleDeleteClick = () => {
-    setShowConfirm(true); // Abre o alerta
-    setModalOpen(false); // Fecha o modal de produto
-  };
-
-  const handleConfirmDelete = () => {
-    deletProduct(); // Chama a função de deletar
-    setShowConfirm(false); // Fecha o alerta
-    router.push('/dashboard/products/list'); // Redireciona para a lista
+  }
   };
 
   useEffect(() => {
@@ -129,7 +130,7 @@ export const ViewProduct = ({ id,  updateProductList }: Props) => {
               {/* Botoões de ação */}
               <div className="flex justify-between items-center w-full">
                 <button
-                  onClick={handleDeleteClick}
+                  onClick={deletProduct}
                   className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
                 >
                   Deletar produto
@@ -148,8 +149,7 @@ export const ViewProduct = ({ id,  updateProductList }: Props) => {
         </Box>
       </Modal>
 
-      {/* Renderiza o alerta de confirmação fora do modal */}
-      {showConfirm && <ConfirmAction onConfirm={handleConfirmDelete} />}
+  
     </>
   );
 };

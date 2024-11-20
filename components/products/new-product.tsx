@@ -12,8 +12,8 @@ import InputLabel from "@mui/material/InputLabel";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package } from "lucide-react";
+import Swal from "sweetalert2";
+import Alert from "@mui/material/Alert";
 
 interface ProductNewProps {
   onProductAdded: () => void;
@@ -35,7 +35,6 @@ const ProductNew: React.FC<ProductNewProps> = ({ onProductAdded }) => {
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
   const [erroMsg, setErrorMessage] = useState("");
-  const [msgSucess, setMsgsucess] = useState("");
   const [nomeProduto, setNomeproduto] = useState("");
   const [marca, setMarca] = useState("");
   const [unidadeMedida, setUnidadeDeMedida] = useState("Unidade");
@@ -54,7 +53,6 @@ const ProductNew: React.FC<ProductNewProps> = ({ onProductAdded }) => {
   const newProduct = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorMessage("");
-    setMsgsucess("");
 
     try {
       const response = await api("/produtos/save", {
@@ -73,13 +71,19 @@ const ProductNew: React.FC<ProductNewProps> = ({ onProductAdded }) => {
         },
       });
 
-      if (response.ok) {
+      if (response.status === 200) {
         onProductAdded(); // Notifica o pai que o produto foi adicionado
         const resp = await response.json();
         console.log(resp);
-        setMsgsucess("Produto criado com sucesso!");
         setRefreshProducts(true); // Trigger re-render in ProductList
         handleModalClose(); //Close the modal
+        await Swal.fire({
+          title: "Sucesso!",
+          text: "Produto criado com sucesso!",
+          icon: "success",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#4CAF50", // Cor do botão
+        });
       } else {
         const errorData = await response.json();
         setErrorMessage(errorData.msg || "Erro ao cadastrar produto.");
@@ -102,7 +106,7 @@ const ProductNew: React.FC<ProductNewProps> = ({ onProductAdded }) => {
 
   return (
     <>
-    {/* esse botão estou usando bootstrap */}
+      {/* esse botão estou usando bootstrap */}
       <button
         type="button"
         className="btn btn-primary"
@@ -118,8 +122,9 @@ const ProductNew: React.FC<ProductNewProps> = ({ onProductAdded }) => {
         aria-describedby="modal-modal-description"
       >
         <Box sx={{ ...style, borderRadius: "16px" }}>
-        {/* {erroMsg && <p style={{ color: "red" }}>{erroMsg}</p>}
+          {/* {erroMsg && <p style={{ color: "red" }}>{erroMsg}</p>}
         {msgSucess && <p style={{ color: "green" }}>{msgSucess}</p>} */}
+          {erroMsg && <Alert severity="error"> {erroMsg}</Alert>}
           <Typography id="modal-modal-title" variant="h6" component="h2">
             Cadastro de Produto
           </Typography>
@@ -138,7 +143,7 @@ const ProductNew: React.FC<ProductNewProps> = ({ onProductAdded }) => {
                 required
               />
               <TextField
-              sx={{ marginTop: 1 }} // Adiciona margem superior
+                sx={{ marginTop: 1 }} // Adiciona margem superior
                 size="small"
                 label="Marca"
                 variant="outlined"
@@ -147,12 +152,11 @@ const ProductNew: React.FC<ProductNewProps> = ({ onProductAdded }) => {
                 onChange={(e) => setMarca(e.target.value)}
                 required
               />
-              <FormControl fullWidth size="small"   sx={{ marginTop: 1 }} >
-                <InputLabel id="unidadeMedida-label" >
+              <FormControl fullWidth size="small" sx={{ marginTop: 1 }}>
+                <InputLabel id="unidadeMedida-label">
                   Unidade de Medida
                 </InputLabel>
                 <Select
-                
                   labelId="unidadeMedida-label"
                   id="unidadeMedida"
                   value={unidadeMedida}
@@ -170,7 +174,7 @@ const ProductNew: React.FC<ProductNewProps> = ({ onProductAdded }) => {
                 </Select>
               </FormControl>
               <TextField
-                sx={{ marginTop: 1 }} 
+                sx={{ marginTop: 1 }}
                 size="small"
                 type="number"
                 label="Quantidade em Estoque"
@@ -181,7 +185,7 @@ const ProductNew: React.FC<ProductNewProps> = ({ onProductAdded }) => {
                 required
               />
               <TextField
-                sx={{ marginTop: 1 }} 
+                sx={{ marginTop: 1 }}
                 size="small"
                 type="number"
                 label="Valor de Compra"
@@ -192,7 +196,7 @@ const ProductNew: React.FC<ProductNewProps> = ({ onProductAdded }) => {
                 required
               />
               <TextField
-                sx={{ marginTop: 1 }} 
+                sx={{ marginTop: 1 }}
                 size="small"
                 type="number"
                 label="Valor de Venda"
@@ -203,7 +207,7 @@ const ProductNew: React.FC<ProductNewProps> = ({ onProductAdded }) => {
                 required
               />
               <TextField
-                sx={{ marginTop: 1 }} 
+                sx={{ marginTop: 1 }}
                 size="small"
                 label="Observações"
                 multiline
@@ -226,18 +230,14 @@ const ProductNew: React.FC<ProductNewProps> = ({ onProductAdded }) => {
               </Button>
               {/* esse botão estou usando bootstrap    */}
               <button type="submit" className="btn btn-primary">
-                    Salvar
-                  </button>
+                Salvar
+              </button>
             </Box>
           </form>
-         
         </Box>
       </Modal>
     </>
   );
 };
-
-
-
 
 export default ProductNew;
