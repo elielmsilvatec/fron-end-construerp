@@ -7,6 +7,7 @@ import Alert from "@mui/material/Alert";
 import CheckIcon from "@mui/icons-material/Check";
 import Link from "next/link";
 import { useState } from "react";
+import { IMaskInput } from "react-imask";
 
 export default function DashboardPage() {
   const [display, setDisplay] = useState(false);
@@ -17,6 +18,16 @@ export default function DashboardPage() {
 
       {display && (
         <>
+          <IMaskInput
+            mask="(00) 00000-0000"
+            name="telefone"
+            type="text"
+            className="form-control"
+            id="telefone"
+            placeholder="(00) 0000-0000"
+            required
+          />
+
           <Alert icon={<CheckIcon fontSize="inherit" />} severity="success">
             Here is a gentle confirmation that your action was successful.
           </Alert>
