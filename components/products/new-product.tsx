@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import api from "@/app/api/api";
-
+import { useRouter } from "next/navigation";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Select from "@mui/material/Select";
@@ -11,7 +11,13 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Modal from "@mui/material/Modal"; // Importar o componente Modal do MUI
+import Modal from "@mui/material/Modal";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Package } from "lucide-react";
+
+interface ProductNewProps {
+  onProductAdded: () => void;
+}
 
 const style = {
   position: "absolute",
@@ -25,13 +31,11 @@ const style = {
   p: 4,
 };
 
-export default function ProductNew() {
+const ProductNew: React.FC<ProductNewProps> = ({ onProductAdded }) => {
+  const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
-  const handleModalOpen = () => setModalOpen(true);
-  const handleModalClose = () => setModalOpen(false);
   const [erroMsg, setErrorMessage] = useState("");
   const [msgSucess, setMsgsucess] = useState("");
-
   const [nomeProduto, setNomeproduto] = useState("");
   const [marca, setMarca] = useState("");
   const [unidadeMedida, setUnidadeDeMedida] = useState("Unidade");
@@ -39,12 +43,18 @@ export default function ProductNew() {
   const [valorCompra, setValorCompra] = useState("");
   const [valorVenda, setValorVenda] = useState("");
   const [observacoes, setObservacoes] = useState("");
+  const [refreshProducts, setRefreshProducts] = useState(false); // Add a refresh state
 
-  // Função para criar novo produto
+  const handleModalOpen = () => setModalOpen(true);
+  const handleModalClose = () => {
+    setModalOpen(false);
+    limparCampos();
+  };
+
   const newProduct = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setErrorMessage(""); // Limpa a mensagem de erro antes de enviar
-    setMsgsucess(""); // Limpa a mensagem de sucesso
+    setErrorMessage("");
+    setMsgsucess("");
 
     try {
       const response = await api("/produtos/save", {
@@ -64,16 +74,15 @@ export default function ProductNew() {
       });
 
       if (response.ok) {
-        // Verifica se a requisição foi bem sucedida (status 200-299)
+        onProductAdded(); // Notifica o pai que o produto foi adicionado
         const resp = await response.json();
         console.log(resp);
         setMsgsucess("Produto criado com sucesso!");
-        // Limpar os campos do formulário
-        limparCampos();
-        setModalOpen(false);
+        setRefreshProducts(true); // Trigger re-render in ProductList
+        handleModalClose(); //Close the modal
       } else {
         const errorData = await response.json();
-        setErrorMessage(errorData.msg || "Erro ao cadastrar produto."); // mensagem padrão se não existir mensagem no erro
+        setErrorMessage(errorData.msg || "Erro ao cadastrar produto.");
       }
     } catch (error) {
       console.error("Erro ao cadastrar produto:", error);
@@ -226,4 +235,9 @@ export default function ProductNew() {
       </Modal>
     </>
   );
-}
+};
+
+
+
+
+export default ProductNew;

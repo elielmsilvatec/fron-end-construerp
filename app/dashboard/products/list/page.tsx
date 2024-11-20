@@ -4,15 +4,20 @@ import ProductList from "@/components/products/list-product";
 
 import NewProduct from "@/components/products/new-product";
 
-export default function App() {
+import React, { useState } from "react";
+
+const Product = () => {
+  //   refreshProducts: Um estado booleano que muda toda vez que queremos sinalizar que os produtos precisam ser recarregados.
+  // triggerRefresh: Função que altera o valor de refreshProducts, invertendo seu estado. Isso força o ProductList a atualizar a lista.
+  const [refreshProducts, setRefreshProducts] = useState(false);
+  const triggerRefresh = () => setRefreshProducts(!refreshProducts);
+
   return (
     <div>
-      <h1 className="text-2xl font-bold  ">Produtos</h1>
-      <NewProduct />
-       <br />
-       <br />
-
-      <ProductList />
+      <NewProduct onProductAdded={triggerRefresh} />
+      <ProductList refreshProducts={refreshProducts} />
     </div>
   );
-}
+};
+
+export default Product;

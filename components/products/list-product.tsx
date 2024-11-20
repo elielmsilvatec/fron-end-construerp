@@ -1,8 +1,6 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, ExternalLink } from "lucide-react";
+import { Package } from "lucide-react";
 import api from "@/app/api/api";
 import { useRouter } from "next/navigation";
 import { ViewProduct } from "./view-product";
@@ -16,12 +14,20 @@ interface Product {
   quantidadeEstoque: string;
 }
 
-export default function ProductList() {
+interface ProductListProps {
+  refreshProducts: boolean;
+}
+
+const ProductList: React.FC<ProductListProps> = ({ refreshProducts }: ProductListProps) => {
+
+
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  // const [refreshProducts, setRefreshProducts] = useState(false); // Add refresh state
+
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -43,7 +49,7 @@ export default function ProductList() {
     };
 
     fetchProducts();
-  }, []);
+  }, [refreshProducts]);  //refreshProducts agora é uma dependência
 
   useEffect(() => {
     // Busca produtos no backend com base no termo de pesquisa
@@ -97,12 +103,18 @@ export default function ProductList() {
       };
       fetchProducts();
     }
-  }, [searchTerm]);
+  },[searchTerm, refreshProducts]); 
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
 
+  // Função para atualizar a lista após a exclusão
+  const updateProductList = (deletedProductId: number) => {
+    setProducts((prevProducts) =>
+      prevProducts.filter((product) => product.id !== deletedProductId)
+    );
+  };
 
   if (error) {
     return (
@@ -114,6 +126,7 @@ export default function ProductList() {
 
   return (
     <>
+    <br /><br />
       <div className="mb-4">
         <input
           type="text"
@@ -145,11 +158,12 @@ export default function ProductList() {
                   currency: "BRL",
                 }).format(product.valorVenda)}
               </p>
-       
+
               {/* essa div abaixo é para adicionar os botões um ao lado do outro */}
               <div className="flex flex-row justify-center items-center gap-4">
                 <EditProduct id={product.id} />
-                <ViewProduct id={product.id} />
+                {/* Passe a função updateProductList para o ViewProduct */}
+                <ViewProduct id={product.id} updateProductList={updateProductList} />
               </div>
             </CardContent>
           </Card>
@@ -163,3 +177,9 @@ export default function ProductList() {
     </>
   );
 }
+
+
+
+
+
+export default ProductList;

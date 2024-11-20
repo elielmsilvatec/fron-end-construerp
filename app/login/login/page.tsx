@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { Toaster, toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 import Link from "next/link";
 import api from "@/app/api/api";
@@ -42,6 +42,7 @@ export default function LoginPage() {
         toast.error(data.message || "Email ou senha incorretos");
       }
     } catch (error) {
+      setMensagem("Erro ao conectar com o servidor");
       toast.error("Erro ao conectar com o servidor");
     } finally {
       setIsLoading(false);
@@ -52,20 +53,21 @@ export default function LoginPage() {
       <div className="w-100" style={{ maxWidth: "400px" }}>
         <div className="card border-0 shadow">
           <div className="card-body">
-        
-          {/* <h2 className="text-center mb-4" style={{ color: '#007bff' }}>Faça seu Login</h2>
+            {/* <h2 className="text-center mb-4" style={{ color: '#007bff' }}>Faça seu Login</h2>
           <h2 className="text-center text-blue-500  font-monaco">Faça seu Login</h2>
           <h2 className="text-center mb-4 text-blue-500 " style={{ fontFamily: 'Monaco, Arial, sans-serif' }}>Faça seu Login</h2> */}
-          {/* <h1 className="text-center mb-4 text-blue-700 " style={{ fontFamily: 'Brush Script MT', fontSize:'80px' }}> Login</h1> */}
-          <h1 className="text-center mb-4 text-blue-700 " style={{ fontFamily: 'Monaco', fontSize:'80px' }}> Login</h1>
+            {/* <h1 className="text-center mb-4 text-blue-700 " style={{ fontFamily: 'Brush Script MT', fontSize:'80px' }}> Login</h1> */}
+            <h1
+              className="text-center mb-4 text-blue-700 "
+              style={{ fontFamily: "Monaco", fontSize: "80px" }}
+            >
+              {" "}
+              Login
+            </h1>
             {/* Exibe a mensagem de erro ou sucesso aqui */}
-            {erroMsg && (
-          <Alert severity="error"> {erroMsg}</Alert>             
-          )}
-
-
-
-
+            {erroMsg && <Alert severity="error"> {erroMsg}</Alert>}
+            {/* usando sonnerpara exibir as mensagens */}
+            {/* <Toaster position="bottom-right" /> */}
             {/* Formulário */}
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
@@ -89,10 +91,8 @@ export default function LoginPage() {
                     disabled={isLoading}
                   />
                 </div>
-               
               </div>{" "}
               <div className="mb-3">
-               
                 <div className="mb-3">
                   <label htmlFor="exampleInputPassword2" className="form-label">
                     Senha:
@@ -114,7 +114,6 @@ export default function LoginPage() {
                   </div>
                 </div>
               </div>{" "}
-
               <div className="form-check mb-3">
                 <input
                   type="checkbox"
