@@ -147,6 +147,7 @@ const EditClient = ({ id, updateClientList }: Props) => {
                 render={({ field, fieldState }) => (
                   <TextField
                     {...field}
+                    label="Nome do cliente"
                     variant="outlined"
                     fullWidth
                     size="small"
@@ -170,6 +171,7 @@ const EditClient = ({ id, updateClientList }: Props) => {
                 render={({ field, fieldState }) => (
                   <TextField
                     {...field}
+                    label="Telefone"
                     variant="outlined"
                     fullWidth
                     size="small"
@@ -186,6 +188,7 @@ const EditClient = ({ id, updateClientList }: Props) => {
                 render={({ field, fieldState }) => (
                   <TextField
                     {...field}
+                    label="CEP"
                     variant="outlined"
                     fullWidth
                     size="small"
@@ -202,6 +205,7 @@ const EditClient = ({ id, updateClientList }: Props) => {
                 render={({ field, fieldState }) => (
                   <TextField
                     {...field}
+                    label="Rua"
                     variant="outlined"
                     fullWidth
                     size="small"
@@ -216,6 +220,7 @@ const EditClient = ({ id, updateClientList }: Props) => {
                 render={({ field }) => (
                   <TextField
                     {...field}
+                    label="N°"
                     type="number"
                     variant="outlined"
                     fullWidth
@@ -231,6 +236,7 @@ const EditClient = ({ id, updateClientList }: Props) => {
                 render={({ field }) => (
                   <TextField
                     {...field}
+                    label="Bairro"
                     variant="outlined"
                     fullWidth
                     size="small"
@@ -245,6 +251,7 @@ const EditClient = ({ id, updateClientList }: Props) => {
                 render={({ field }) => (
                   <TextField
                     {...field}
+                    label="Cidade"
                     variant="outlined"
                     fullWidth
                     size="small"
@@ -259,6 +266,7 @@ const EditClient = ({ id, updateClientList }: Props) => {
                 render={({ field }) => (
                   <TextField
                     {...field}
+                    label="Observações"
                     multiline
                     rows={3}
                     variant="outlined"
