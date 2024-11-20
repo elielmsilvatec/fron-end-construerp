@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 import { Toaster, toast } from 'sonner';
 import Alert from "@mui/material/Alert";
 import CheckIcon from "@mui/icons-material/Check";
-import Success from "@/components/sweetalert2/success"
 
 export default function CadastroPage() {
   const router = useRouter();

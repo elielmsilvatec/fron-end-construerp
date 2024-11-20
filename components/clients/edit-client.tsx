@@ -6,10 +6,6 @@ import api from "@/app/api/api";
 import { FilePenLine } from "lucide-react";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
@@ -29,34 +25,47 @@ const style = {
   borderRadius: "16px",
 };
 
-// Props recebendo o ID do produto
-type Props = {
+interface Props {
+  // update : () => void;
   id: number;
-};
+  updateClientList: () => void;
+}
 
-type Produto = {
-  nomeProduto: string;
-  marca: string;
-  unidadeMedida: string;
-  quantidadeEstoque: string;
-  valorCompra: string;
-  valorVenda: string;
-  observacoes: string;
-};
+interface Clients {
+  nome: string;
+  telefone: string;
+  cep?: string;
+  rua?: string;
+  numero?: number;
+  bairro?: string;
+  cidade?: string;
+  observacoes?: string;
+}
 
-const EditProduct = ({ id }: Props) => {
+const EditClient = ({ id, updateClientList }: Props) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
-    // criação do formulário com react-hook-form iportando props Produto
-  const { control, handleSubmit, reset } = useForm<Produto>();
+  // criação do formulário com react-hook-form iportando props Produto
+  const { control, handleSubmit, reset } = useForm<Clients>({
+    defaultValues: {
+      nome: "",
+      telefone: "",
+      cep: "",
+      rua: "",
+      numero: 0,
+      bairro: "",
+      cidade: "",
+      observacoes: "",
+    },
+  });
 
   const handleModalOpen = async () => {
     setModalOpen(true);
     try {
-      const response = await api(`/produtos/view/${id}`);
+      const response = await api(`/cliente/view/${id}`);
       const data = await response.json();
-      reset(data); // Atualiza o formulário com os dados do produto
+      reset(data.cliente); // Atualiza o formulário com os dados do produto
     } catch (error) {
       console.error("Erro ao buscar produto:", error);
     }
@@ -67,10 +76,10 @@ const EditProduct = ({ id }: Props) => {
     reset(); // Reseta os campos para os valores originais
   };
 
-  const onSubmit = async (formData: Produto) => {
+  const onSubmit = async (formData: Clients) => {
     try {
       setLoading(true);
-      const response = await api(`/produto/atualizar/${id}`, {
+      const response = await api(`/cliente/edit/save/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -82,17 +91,18 @@ const EditProduct = ({ id }: Props) => {
         handleModalClose();
         await Swal.fire({
           title: "Atualizado!",
-          text: "Produto atualizado com sucesso!",
+          text: "Cadastro cliente atualizado com sucesso!",
           icon: "success",
           confirmButtonText: "OK",
           confirmButtonColor: "#4CAF50",
         });
+        updateClientList();
       } else {
-        setErro("Falha ao atualizar o produto.");
-        throw new Error("Falha ao atualizar o produto.");
+        setErro("Falha ao atualizar o cliente.");
+        throw new Error("Falha ao atualizar o cliente.");
       }
     } catch (error) {
-      setErro("Erro ao atualizar o produto.");
+      setErro("Erro ao atualizar o cliente.");
     } finally {
       setLoading(false);
     }
@@ -118,151 +128,142 @@ const EditProduct = ({ id }: Props) => {
         <Box sx={style}>
           {erro && <Alert severity="error"> {erro}</Alert>}
           <Typography id="modal-modal-title" variant="h6" component="h2">
-            Atualizar Produto
+            Atualizar dados do cliente
           </Typography>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 2 }}>
               {/* Campos do formulário usando react-hook-form */}
               <Controller
-                name="nomeProduto"
+                name="nome"
                 control={control}
-                defaultValue=""
                 rules={{
-                  required: "O nome do produto é obrigatório", // Mensagem de erro
+                  required: "O nome do cliente é obrigatório",
                   minLength: {
-                    value: 3,
-                    message: "O nome do produto deve ter pelo menos 3 caracteres",
-                  }
+                    value: 2,
+                    message:
+                      "O nome do cliente deve ter pelo menos 2 caracteres",
+                  },
                 }}
                 render={({ field, fieldState }) => (
                   <TextField
                     {...field}
-                    size="small"
-                    label="Nome do Produto"
                     variant="outlined"
                     fullWidth
-                    error={!!fieldState.error} // Indica se há erro
-                    helperText={fieldState.error?.message} // Exibe a mensagem de erro
+                    size="small"
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
                   />
                 )}
               />
 
+              {/* Telefone */}
               <Controller
-                name="marca"
+                name="telefone"
                 control={control}
-                defaultValue=""
+                rules={{
+                  required: "O telefone é obrigatório",
+                  pattern: {
+                    value: /^[0-9]{10,11}$/,
+                    message: "Digite um telefone válido com 10 ou 11 dígitos",
+                  },
+                }}
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    variant="outlined"
+                    fullWidth
+                    size="small"
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                  />
+                )}
+              />
+
+              {/* CEP */}
+              <Controller
+                name="cep"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    variant="outlined"
+                    fullWidth
+                    size="small"
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                  />
+                )}
+              />
+
+              {/* Rua */}
+              <Controller
+                name="rua"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    variant="outlined"
+                    fullWidth
+                    size="small"
+                  />
+                )}
+              />
+
+              {/* Número */}
+              <Controller
+                name="numero"
+                control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    size="small"
-                    label="Marca"
+                    type="number"
                     variant="outlined"
                     fullWidth
+                    size="small"
                   />
                 )}
               />
+
+              {/* Bairro */}
               <Controller
-                name="unidadeMedida"
+                name="bairro"
                 control={control}
-                defaultValue=""
                 render={({ field }) => (
-                  <FormControl fullWidth size="small">
-                    <InputLabel id="unidadeMedida-label">
-                      Unidade de Medida
-                    </InputLabel>
-                    <Select
-                      {...field}
-                      value={field.value || ""}
-                      label="Unidade de Medida"
-                    >
-                      <MenuItem value="Unidade">Unidade</MenuItem>
-                      <MenuItem value="kg">kg</MenuItem>
-                      <MenuItem value="Metro">Metro</MenuItem>
-                      <MenuItem value="Litro">Litro</MenuItem>
-                      <MenuItem value="Milheiro">Milheiro</MenuItem>
-                      <MenuItem value="Pacote">Pacote</MenuItem>
-                      <MenuItem value="Saco">Saco</MenuItem>
-                      <MenuItem value="duzia">Dúzia</MenuItem>
-                    </Select>
-                  </FormControl>
-                )}
-              />
-              <Controller
-                name="quantidadeEstoque"
-                control={control}
-                defaultValue=""
-                rules={{
-                  required: "Quantidade em estoque é obrigatório", // Mensagem de erro
-                  minLength: 1,
-                }}
-                render={({ field, fieldState }) => (
                   <TextField
                     {...field}
-                    size="small"
-                    type="number"
-                    label="Quantidade em Estoque"
                     variant="outlined"
                     fullWidth
-                    error={!!fieldState.error} // Indica se há erro
-                    helperText={fieldState.error?.message} // Exibe a mensagem de erro
+                    size="small"
                   />
                 )}
               />
+
+              {/* Cidade */}
               <Controller
-                name="valorCompra"
+                name="cidade"
                 control={control}
-                defaultValue=""
-                rules={{
-                  required: "Valor de compra é obrigatório", // Mensagem de erro
-                  minLength: 1,
-                }}
-                render={({ field, fieldState }) => (
+                render={({ field }) => (
                   <TextField
                     {...field}
-                    size="small"
-                    type="number"
-                    label="Valor de Compra"
                     variant="outlined"
                     fullWidth
-                    error={!!fieldState.error} // Indica se há erro
-                    helperText={fieldState.error?.message} // Exibe a mensagem de erro
+                    size="small"
                   />
                 )}
               />
-              <Controller
-                name="valorVenda"
-                control={control}
-                defaultValue=""
-                rules={{
-                  required: "Valor de venda é obrigatório", // Mensagem de erro
-                  minLength: 1,
-                }}
-                render={({ field, fieldState }) => (
-                  <TextField
-                    {...field}
-                    size="small"
-                    type="number"
-                    label="Valor de Venda"
-                    variant="outlined"
-                    fullWidth
-                    error={!!fieldState.error} // Indica se há erro
-                    helperText={fieldState.error?.message} // Exibe a mensagem de erro
-                  />
-                )}
-              />
+
+              {/* Observações */}
               <Controller
                 name="observacoes"
                 control={control}
-                defaultValue=""
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    size="small"
-                    label="Observações"
                     multiline
-                    rows={4}
+                    rows={3}
                     variant="outlined"
                     fullWidth
+                    size="small"
                   />
                 )}
               />
@@ -294,4 +295,4 @@ const EditProduct = ({ id }: Props) => {
   );
 };
 
-export default EditProduct;
+export default EditClient;
