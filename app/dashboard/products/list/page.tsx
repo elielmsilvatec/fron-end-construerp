@@ -13,10 +13,12 @@ const Product = () => {
   const triggerRefresh = () => setRefreshProducts(!refreshProducts);
 
   return (
+   <>
     <div>
       <NewProduct onProductAdded={triggerRefresh} />
       <ProductList refreshProducts={refreshProducts} />
     </div>
+    </>
   );
 };
 
