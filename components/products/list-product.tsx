@@ -168,7 +168,7 @@ const ProductList: React.FC<ProductListProps> = ({ refreshProducts }: ProductLis
             </CardContent>
           </Card>
         ))}
-        {products.length === 0 && error != "" && (
+        {products.length === 0 && error != "" &&  isLoading === null && (
           <div className="col-span-full text-center py-8 text-gray-500">
             Nenhum produto encontrado
           </div>

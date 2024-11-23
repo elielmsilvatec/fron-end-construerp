@@ -30,7 +30,7 @@ const ClientList: React.FC<ClientsListProps> = ({
   const [clients, setClients] = useState<Clients[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     const fetchClients = async () => {
       try {
@@ -51,7 +51,7 @@ const ClientList: React.FC<ClientsListProps> = ({
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        setIsLoading(true);
+        // setIsLoading(true);
         const response = await api("/cliente/buscar", {
           method: "POST",
           body: JSON.stringify({
@@ -69,7 +69,7 @@ const ClientList: React.FC<ClientsListProps> = ({
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error fetching clients");
       } finally {
-        setIsLoading(false);
+        // setIsLoading(false);
       }
     };
     if (searchTerm) {
@@ -77,7 +77,7 @@ const ClientList: React.FC<ClientsListProps> = ({
     } else {
       const fetchClients = async () => {
         try {
-          setIsLoading(true);
+          // setIsLoading(true);
           const response = await api("/cliente/clientes");
           if (!response.ok) {
             throw new Error("Failed to fetch clients");
@@ -89,7 +89,7 @@ const ClientList: React.FC<ClientsListProps> = ({
             err instanceof Error ? err.message : "Error fetching clients"
           );
         } finally {
-          setIsLoading(false);
+          // setIsLoading(false);
         }
       };
       fetchClients();
