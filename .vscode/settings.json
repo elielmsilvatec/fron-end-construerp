@@ -1,0 +1,13 @@
+{
+    "workbench.colorCustomizations": {
+
+    },
+    "files.exclude": {
+        "app/api/": true,
+        "app/login/": true,
+        "hooks": true,
+        "lib": true,
+        "node_modules": true,
+        "public": true
+    }
+}

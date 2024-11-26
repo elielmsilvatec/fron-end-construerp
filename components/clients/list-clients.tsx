@@ -4,7 +4,7 @@ import { User } from "lucide-react";
 import api from "@/app/api/api";
 import { useRouter } from "next/navigation";
 import { set } from "date-fns";
-import  ViewClient  from "./view-client";
+import ViewClient from "./view-client";
 import EditClient from "./edit-client";
 
 interface Clients {
@@ -20,16 +20,17 @@ interface Clients {
 }
 
 interface ClientsListProps {
-  update : () => void;
+  update: () => void;
 }
 
 const ClientList: React.FC<ClientsListProps> = ({
   update,
 }: ClientsListProps) => {
-
   const [clients, setClients] = useState<Clients[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [client_vazio, setClientVazio] = useState(false);
+
   // const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     const fetchClients = async () => {
@@ -39,6 +40,12 @@ const ClientList: React.FC<ClientsListProps> = ({
           throw new Error("Failed to fetch clients");
         }
         const data = await response.json();
+
+        // caso não tenha nenhum cliente cadastrado
+        if (data.clientes.length === 0) {
+          setClientVazio(true);
+        }
+
         setClients(data.clientes);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error fetching clients");
@@ -100,10 +107,8 @@ const ClientList: React.FC<ClientsListProps> = ({
     setSearchTerm(e.target.value);
   };
 
-
   return (
     <>
-
       <div className="mb-4">
         <input
           type="text"
@@ -136,13 +141,20 @@ const ClientList: React.FC<ClientsListProps> = ({
 
               {/* essa div abaixo é para adicionar os botões um ao lado do outro */}
               <div className="flex flex-row justify-center items-center gap-4">
-                <EditClient id={client.id} updateClientList={update}/>
+                <EditClient id={client.id} updateClientList={update} />
                 {/* Passe a função updateProductList para o ViewProduct */}
                 <ViewClient id={client.id} updateClientList={update} />
               </div>
             </CardContent>
           </Card>
         ))}
+        {client_vazio === true && (
+          <div className="text-center mt-4">
+            <p className="text-lg font-bold text-gray-500">
+              Nenhum cliente cadastrado
+            </p>
+          </div>
+        )}
       </div>
     </>
   );

@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package } from "lucide-react";
+import { Package, ShoppingCartIcon } from "lucide-react";
 import api from "@/app/api/api";
 import { useRouter } from "next/navigation";
-import { ViewProduct } from "./view-product";
-import EditProduct from "./edit-product";
 
 interface Product {
   id: number;
@@ -14,50 +12,20 @@ interface Product {
   quantidadeEstoque: string;
 }
 
-interface ProductListProps {
-  refreshProducts: boolean;
+interface Props {
+  update_list: () => void;
 }
 
-const ProductList: React.FC<ProductListProps> = ({ refreshProducts }: ProductListProps) => {
-
-
+const ProductSearch: React.FC<Props> = ({ update_list }: Props) => {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  
-
-  // const [refreshProducts, setRefreshProducts] = useState(false); // Add refresh state
-
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setIsLoading(true);
-        const response = await api("/produto/produtos");
-        if (!response.ok) {
-          throw new Error("Falha ao carregar produtos");
-        }
-        const data = await response.json();
-        setProducts(data.produtos);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Erro ao carregar produtos"
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, [refreshProducts]);  //refreshProducts agora é uma dependência
 
   useEffect(() => {
     // Busca produtos no backend com base no termo de pesquisa
     const fetchFilteredProducts = async () => {
       try {
-        setIsLoading(true);
         const response = await api("/produto/buscar", {
           method: "POST",
           body: JSON.stringify({
@@ -77,8 +45,6 @@ const ProductList: React.FC<ProductListProps> = ({ refreshProducts }: ProductLis
         setError(
           err instanceof Error ? err.message : "Erro ao carregar produtos"
         );
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -86,36 +52,33 @@ const ProductList: React.FC<ProductListProps> = ({ refreshProducts }: ProductLis
       fetchFilteredProducts();
     } else {
       // Se o termo de pesquisa estiver vazio, recarregue todos os produtos
-      const fetchProducts = async () => {
-        try {
-          setIsLoading(true);
-          const response = await api("/produto/produtos");
-          if (!response.ok) {
-            throw new Error("Falha ao carregar produtos");
-          }
-          const data = await response.json();
-          setProducts(data.produtos);
-        } catch (err) {
-          setError(
-            err instanceof Error ? err.message : "Erro ao carregar produtos"
-          );
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      fetchProducts();
+      setProducts([]);
     }
-  },[searchTerm, refreshProducts]); 
+  }, [searchTerm, update_list]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
 
-  // Função para atualizar a lista após a exclusão
-  const updateProductList = (deletedProductId: number) => {
-    setProducts((prevProducts) =>
-      prevProducts.filter((product) => product.id !== deletedProductId)
-    );
+  const addProductRequest = async (productId: number) => {
+    try {
+      // Substitua o comentário abaixo com a lógica de requisição
+      // const response = await api("/produto/solicitacao", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({ id: productId }), // Envia o ID do produto
+      // });
+
+      alert(
+        `Solicitação de produto com ID ${productId} adicionada com sucesso!`
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Erro ao adicionar solicitação"
+      );
+    }
   };
 
   if (error) {
@@ -128,7 +91,6 @@ const ProductList: React.FC<ProductListProps> = ({ refreshProducts }: ProductLis
 
   return (
     <>
-    <br /><br />
       <div className="mb-4">
         <input
           type="text"
@@ -162,26 +124,21 @@ const ProductList: React.FC<ProductListProps> = ({ refreshProducts }: ProductLis
               </p>
 
               {/* essa div abaixo é para adicionar os botões um ao lado do outro */}
-              <div className="flex flex-row justify-center items-center gap-4">
-                <EditProduct id={product.id} />
-                {/* Passe a função updateProductList para o ViewProduct */}
-                <ViewProduct id={product.id} updateProductList={updateProductList} />
-              </div>
+
+              <button
+                className="flex flex-row justify-center items-center gap-4 text-blue-500 "
+                type="button"
+                onClick={() => addProductRequest(product.id)} // Passa o ID do produto
+              >
+                <ShoppingCartIcon className="h-6 w-6 text-blue-500" />
+                Adicionar
+              </button>
             </CardContent>
           </Card>
         ))}
-        {products.length === 0 && error != "" &&  isLoading === null && (
-          <div className="col-span-full text-center py-8 text-gray-500">
-            Nenhum produto encontrado
-          </div>
-        )}
       </div>
     </>
   );
-}
+};
 
-
-
-
-
-export default ProductList;
+export default ProductSearch;

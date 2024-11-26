@@ -2,8 +2,22 @@
 
 
 "use client";
-
+import { useEffect, useState } from "react";
 export default function Loading() {
+  
+  // const [showLoading, setShowLoading] = useState(true);
+
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     setShowLoading(false);
+  //   }, 90000); // 3 segundos
+
+  //   return () => clearTimeout(timer); // Limpa o timer ao desmontar o componente
+  // }, []);
+  // if (!showLoading) {
+  //   return null; // Retorna nada após o atraso
+  // }
+
   return (
     <>
       <style jsx>{`
