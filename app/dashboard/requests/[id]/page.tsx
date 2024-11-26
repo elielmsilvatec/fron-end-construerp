@@ -50,10 +50,10 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
 
   const handleEditItem = async (updatedItem: Item) => {
     try {
-      await api(`/item/editar/${updatedItem.id}`, updatedItem);
-      Swal.fire("Sucesso!", "Item atualizado com sucesso!", "success");
-      setRefreshClients(!refreshClients);
-      handleModalClose();
+      // await api(`/item/editar/${updatedItem.id}`, updatedItem);
+      // Swal.fire("Sucesso!", "Item atualizado com sucesso!", "success");
+      // setRefreshClients(!refreshClients);
+      // handleModalClose();
     } catch (error) {
       console.error("Erro ao editar item:", error);
       Swal.fire("Erro!", "Erro ao editar item.", "error");
@@ -73,10 +73,10 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
 
   return (
     <>
-      <table className="table table-hover responsive ">
+      <table className="table table-hover responsive " >
         {/* <table className="table table-hover table-bordered "> */}
         <thead className="thead-light ">
-          <tr>
+          <tr >
             <th>ID</th>
             <th>Nome</th>
             <th className="text-center align-middle ">Medida</th>
@@ -88,7 +88,7 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
             <th className="text-center align-middle">Excluir</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody >
           {items.map((item) => (
             <tr key={item.id}>
               <td className="align-middle">{item.id}</td>
