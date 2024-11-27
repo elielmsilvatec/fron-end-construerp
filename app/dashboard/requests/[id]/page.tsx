@@ -3,7 +3,7 @@ import { FilePenLine, Trash2Icon } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import api from "@/app/api/api";
 import Swal from "sweetalert2";
-
+import SearchProduct from "@/components/resquests/search-product-request";
 
 
 interface Item {
@@ -19,6 +19,8 @@ interface Item {
 const App = ({ params }: { params: Promise<{ id: number }> }) => {
   const { id } = React.use(params);
 
+    // Gerenciar estado para forçar atualização
+    const updateRefresh = () => setRefreshClients(!refreshClients);
   const [refreshClients, setRefreshClients] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -40,6 +42,8 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
         const response = await api(`/pedido/ver/${id}`);
         const data = await response.json();
         setItems(data.itemPedido);
+        // console.log(data.pedido.id, "pedido", id_pedido);
+ 
       } catch (error) {
         console.error("Erro ao carregar pedidos:", error);
       }
@@ -73,6 +77,7 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
 
   return (
     <>
+    <SearchProduct  update_list={updateRefresh} id_pedido={id}/>
       <table className="table table-hover responsive " >
         {/* <table className="table table-hover table-bordered "> */}
         <thead className="thead-light ">

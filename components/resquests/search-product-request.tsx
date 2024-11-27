@@ -14,9 +14,10 @@ interface Product {
 
 interface Props {
   update_list: () => void;
+  id_pedido: number;
 }
 
-const ProductSearch: React.FC<Props> = ({ update_list }: Props) => {
+const ProductSearch: React.FC<Props> = ({ update_list, id_pedido }: Props) => {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -62,18 +63,45 @@ const ProductSearch: React.FC<Props> = ({ update_list }: Props) => {
 
   const addProductRequest = async (productId: number) => {
     try {
-      // Substitua o comentário abaixo com a lógica de requisição
-      // const response = await api("/produto/solicitacao", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({ id: productId }), // Envia o ID do produto
-      // });
+  // Obtendo os dados do produto
+  const produtoResponse = await api(`/produtos/view/${productId}`);
+  const produto = await produtoResponse.json();
 
-      alert(
-        `Solicitação de produto com ID ${productId} adicionada com sucesso!`
-      );
+  // Extraindo os campos necessários do produto
+  const { nomeProduto, unidadeMedida, valorCompra, valorVenda, marca } = produto;
+
+  // Obtendo os dados do pedido
+  const pedidoResponse = await api(`/pedido/ver/${id_pedido}`);
+  const pedido = await pedidoResponse.json();
+  const IDpedido = pedido.pedido.id; // ID do pedido
+
+  // Construindo os dados para envio
+  const data = {
+    nome: nomeProduto,
+    undMedidas: unidadeMedida,
+    marca, // Marca do produto
+    sub_total_itens: valorVenda, // Subtotal do item é o valor de venda
+    valor_compra: valorCompra, // Valor de compra
+    IDpedido, // ID do pedido
+    itens_produto: productId, // ID do produto
+  };
+
+  // Enviando os dados para a rota POST
+  const response = await api("/pedido/add/produto_item", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data), // Converte o objeto para JSON
+  });
+
+  if (!response.ok) {
+    throw new Error("Erro ao adicionar o item ao pedido");
+  }
+
+  update_list();
+  setSearchTerm("");
+
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Erro ao adicionar solicitação"
