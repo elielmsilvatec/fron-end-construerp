@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, ShoppingCartIcon } from "lucide-react";
 import api from "@/app/api/api";
@@ -15,13 +15,20 @@ interface Product {
 interface Props {
   update_list: () => void;
   id_pedido: number;
+  onSearchTermChange: (term: string) => void; // Nova prop
 }
 
-const ProductSearch: React.FC<Props> = ({ update_list, id_pedido }: Props) => {
+const ProductSearch: React.FC<Props> = ({
+  update_list,
+  onSearchTermChange,
+  id_pedido,
+}: Props) => {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  // Cria uma referência para o input
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     // Busca produtos no backend com base no termo de pesquisa
@@ -59,49 +66,55 @@ const ProductSearch: React.FC<Props> = ({ update_list, id_pedido }: Props) => {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+    onSearchTermChange(e.target.value); // Notifica o componente pai
   };
 
   const addProductRequest = async (productId: number) => {
     try {
-  // Obtendo os dados do produto
-  const produtoResponse = await api(`/produtos/view/${productId}`);
-  const produto = await produtoResponse.json();
+      // Obtendo os dados do produto
+      const produtoResponse = await api(`/produtos/view/${productId}`);
+      const produto = await produtoResponse.json();
 
-  // Extraindo os campos necessários do produto
-  const { nomeProduto, unidadeMedida, valorCompra, valorVenda, marca } = produto;
+      // Extraindo os campos necessários do produto
+      const { nomeProduto, unidadeMedida, valorCompra, valorVenda, marca } =
+        produto;
 
-  // Obtendo os dados do pedido
-  const pedidoResponse = await api(`/pedido/ver/${id_pedido}`);
-  const pedido = await pedidoResponse.json();
-  const IDpedido = pedido.pedido.id; // ID do pedido
+      // Obtendo os dados do pedido
+      const pedidoResponse = await api(`/pedido/ver/${id_pedido}`);
+      const pedido = await pedidoResponse.json();
+      const IDpedido = pedido.pedido.id; // ID do pedido
 
-  // Construindo os dados para envio
-  const data = {
-    nome: nomeProduto,
-    undMedidas: unidadeMedida,
-    marca, // Marca do produto
-    sub_total_itens: valorVenda, // Subtotal do item é o valor de venda
-    valor_compra: valorCompra, // Valor de compra
-    IDpedido, // ID do pedido
-    itens_produto: productId, // ID do produto
-  };
+      // Construindo os dados para envio
+      const data = {
+        nome: nomeProduto,
+        undMedidas: unidadeMedida,
+        marca, // Marca do produto
+        sub_total_itens: valorVenda, // Subtotal do item é o valor de venda
+        valor_compra: valorCompra, // Valor de compra
+        IDpedido, // ID do pedido
+        itens_produto: productId, // ID do produto
+      };
 
-  // Enviando os dados para a rota POST
-  const response = await api("/pedido/add/produto_item", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data), // Converte o objeto para JSON
-  });
+      // Enviando os dados para a rota POST
+      const response = await api("/pedido/add/produto_item", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data), // Converte o objeto para JSON
+      });
 
-  if (!response.ok) {
-    throw new Error("Erro ao adicionar o item ao pedido");
-  }
+      if (!response.ok) {
+        throw new Error("Erro ao adicionar o item ao pedido");
+      }
 
-  update_list();
-  setSearchTerm("");
-
+      // Atualiza a lista de produtos E LIMPA O FORMULARIO
+      update_list();
+      setSearchTerm("");
+      onSearchTermChange("");
+      if (inputRef.current) {
+        inputRef.current.focus(); // Definir o foco no input
+      }
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Erro ao adicionar solicitação"
@@ -121,6 +134,7 @@ const ProductSearch: React.FC<Props> = ({ update_list, id_pedido }: Props) => {
     <>
       <div className="mb-4">
         <input
+          ref={inputRef} // Adiciona o ref ao input
           type="text"
           placeholder="Pesquisar produtos..."
           className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"

@@ -1,236 +1,334 @@
 "use client";
-import { FilePenLine, Trash2Icon } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import api from "@/app/api/api";
+import { useForm, Controller } from "react-hook-form";
+import { FilePenLine, SaveIcon, Trash2Icon } from "lucide-react";
 import Swal from "sweetalert2";
+import api from "@/app/api/api";
 import SearchProduct from "@/components/resquests/search-product-request";
-
+import { useRouter } from 'next/navigation';
 
 interface Item {
   id: number;
   nome: string;
   undMedidas: string;
   marca: string;
-  quant_itens: number;
-  valor: number;
+  quant_itens: string;
   total: number;
+  valor_unitario: string;
+  valor_compra: string;
+  sub_total_itens: number;
 }
 
 const App = ({ params }: { params: Promise<{ id: number }> }) => {
   const { id } = React.use(params);
-
-    // Gerenciar estado para forçar atualização
-    const updateRefresh = () => setRefreshClients(!refreshClients);
-  const [refreshClients, setRefreshClients] = useState(false);
+  const router = useRouter();
   const [items, setItems] = useState<Item[]>([]);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editItem, setEditItem] = useState<Item | null>(null);
+  const [editQuantityId, setEditQuantityId] = useState<number | null>(null);
+  const [editValueId, setEditValueId] = useState<number | null>(null);
+  const [refreshItem, setRefreshItem] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(""); // Estado compartilhado
+  const { control, handleSubmit, reset, getValues, setValue } = useForm<Item>({
+    defaultValues: {
+      id: 0,
+      nome: "",
+      quant_itens: "",
+      valor_unitario: "",
+    },
+  });
 
-  const handleModalOpen = (item: Item) => {
-    setEditItem(item);
-    setModalOpen(true);
-  };
-
-  const handleModalClose = () => {
-    setEditItem(null);
-    setModalOpen(false);
-  };
-
-  useEffect(() => {
-    const fetchRequests = async () => {
-      try {
-        const response = await api(`/pedido/ver/${id}`);
-        const data = await response.json();
-        setItems(data.itemPedido);
-        // console.log(data.pedido.id, "pedido", id_pedido);
- 
-      } catch (error) {
-        console.error("Erro ao carregar pedidos:", error);
-      }
-    };
-
-    fetchRequests();
-  }, [id, refreshClients]);
-
-  const handleEditItem = async (updatedItem: Item) => {
+  const fetchRequests = async () => {
     try {
-      // await api(`/item/editar/${updatedItem.id}`, updatedItem);
-      // Swal.fire("Sucesso!", "Item atualizado com sucesso!", "success");
-      // setRefreshClients(!refreshClients);
-      // handleModalClose();
+      const response = await api(`/pedido/ver/${id}`);
+      const data = await response.json();
+      setItems(data.itemPedido);
     } catch (error) {
-      console.error("Erro ao editar item:", error);
-      Swal.fire("Erro!", "Erro ao editar item.", "error");
+      console.error("Erro ao carregar pedidos:", error);
     }
   };
 
-  const handleDeleteItem = async (itemId: number) => {
+  useEffect(() => {
+    fetchRequests();
+  }, [id, refreshItem]);
+
+  const handleEditQuantity = (item: Item) => {
+    setEditQuantityId(item.id);
+    reset(item);
+  };
+
+  const handleEditValue = (item: Item) => {
+    setEditValueId(item.id);
+    reset(item);
+  };
+
+  const handleSaveQuantity = async () => {
+    const updatedItem = getValues();
     try {
-      await api(`/item/deletar/${itemId}`);
-      Swal.fire("Sucesso!", "Item deletado com sucesso!", "success");
-      setRefreshClients(!refreshClients);
+      if (Number(updatedItem.quant_itens) <= 0) {
+        Swal.fire("Erro!", "Quantidade não pode ser zero ou vazia.", "error");
+        return;
+      }
+
+      await api("/pedido/editar/quant", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: updatedItem.id,
+          IDpedido: id,
+          quant: updatedItem.quant_itens,
+        }),
+      });
+
+      setRefreshItem(!refreshItem);
+      setEditQuantityId(null);
+    } catch (error) {
+      console.error("Erro ao salvar quantidade:", error);
+      Swal.fire("Erro!", "Erro ao salvar quantidade.", "error");
+    }
+  };
+
+  const handleSaveValue = async () => {
+    const updatedItem = getValues();
+    try {
+      if (
+        Number(updatedItem.valor_unitario) < Number(updatedItem.valor_compra)
+      ) {
+        Swal.fire(
+          "Erro!",
+          "O valor unitário não pode ser menor que o valor de compra.",
+          "error"
+        );
+        return;
+      }
+      const valorUnitario = updatedItem.valor_unitario.replace(".", ","); // Substitui a vírgula por ponto
+
+      await api("/pedido/editar/valor_unitario", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: updatedItem.id,
+          IDpedido: id,
+          valor_unitario: valorUnitario,
+        }),
+      });
+
+      setRefreshItem(!refreshItem);
+      setEditValueId(null);
+    } catch (error) {
+      console.error("Erro ao salvar valor:", error);
+      Swal.fire("Erro!", "Erro ao salvar valor.", "error");
+    }
+  };
+
+  // deletando item
+  const handleDelete = async (itemId: number) => {
+    try {
+      const confirmation = await Swal.fire({
+        title: "Tem certeza?",
+        text: "Esta ação não pode ser desfeita.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sim, deletar!",
+        cancelButtonText: "Cancelar",
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+      });
+      if (confirmation.isConfirmed) {
+        await api("/pedido/delet/item", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ id: itemId }),
+        });
+        setRefreshItem(!refreshItem);
+        Swal.fire("Deletado!", "Item deletado com sucesso!", "success");
+      }
     } catch (error) {
       console.error("Erro ao deletar item:", error);
       Swal.fire("Erro!", "Erro ao deletar item.", "error");
     }
   };
+//  deletando pedido
+const handleDeleteOrder = async () => {
+  try {
+    const confirmation = await Swal.fire({
+      title: "Tem certeza?",
+      text: "Esta ação não pode ser desfeita.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sim, deletar!",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+    });
+    if (confirmation.isConfirmed) {
 
+      await api(`/pedido/delet/${id}`);
+      // setRefreshItem(!refreshItem);
+      // faz uma consulta a pedidos depois de excluir
+      const response = await api("/pedido/pedidos");
+      const data = await response.json();
+      
+      router.push('/dashboard/requests/list');
+    }
+  } catch (error) {
+    console.error("Erro ao deletar pedido:", error);
+    Swal.fire("Erro!", "Erro ao deletar pedido.", "error");
+  }
+}
+
+
+const handlePrintOrder = async () => {
+  try {  
+      await api(`/pedido/imprimir/${id}`);   
+  } catch (error) {
+    console.error("Erro ao imprimir pedido:", error);
+    Swal.fire("Erro!", "Erro ao imprimir pedido.", "error");
+  } 
+}
   return (
     <>
-    <SearchProduct  update_list={updateRefresh} id_pedido={id}/>
-      <table className="table table-hover responsive " >
-        {/* <table className="table table-hover table-bordered "> */}
-        <thead className="thead-light ">
-          <tr >
-            <th>ID</th>
-            <th>Nome</th>
-            <th className="text-center align-middle ">Medida</th>
-            <th className="text-center align-middle">Marca</th>
-            <th className="text-center align-middle">Quantidade</th>
-            <th className="text-center align-middle">Valor</th>
-            <th className="text-center align-middle">Total</th>
-            <th className="text-center align-middle">Editar</th>
-            <th className="text-center align-middle">Excluir</th>
-          </tr>
-        </thead>
-        <tbody >
-          {items.map((item) => (
-            <tr key={item.id}>
-              <td className="align-middle">{item.id}</td>
-              <td className="align-middle">{item.nome}</td>
-              <td className="text-center align-middle">{item.undMedidas}</td>
-              <td className="text-center align-middle">{item.marca}</td>
-              <td className="text-center align-middle">{item.quant_itens}</td>
-              <td className="text-center align-middle">{item.valor}</td>
-              <td className="text-center align-middle">{item.total}</td>
+      <SearchProduct
+        update_list={() => setRefreshItem(!refreshItem)}
+        id_pedido={id}
+        onSearchTermChange={setSearchTerm}
+      />
 
-              {/* <button className="btn btn-primary me-2" onClick={() => handleModalOpen(item)}>
-                  Editar
-                </button>
-                <button className="btn btn-danger" onClick={() => handleDeleteItem(item.id)}>
-                  Deletar
-                </button> */}
-              <td
-                className="text-center align-middle"
-                onClick={() => handleModalOpen(item)}
-              >
-                <div className="flex items-center justify-center gap-2 cursor-pointer">
-                  <FilePenLine className="text-blue-400" />
-                  {/* <span className="text-blue-400"></span> */}
-                </div>
-                
-              </td>
-              <td className="text-center align-middle"onClick={() => handleDeleteItem(item.id)}>
-                <div className="flex items-center justify-center gap-2 cursor-pointer ">
-                  <Trash2Icon className="text-red-400" />
-                  {/* <span className="text-red-400"></span> */}
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {searchTerm === "" && (
+        <>
+          <table className="table table-hover responsive">
+            <thead className="thead-light">
+              <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th className="text-center">Medida</th>
+                <th className="text-center">Marca</th>
+                <th className="text-center">Quantidade</th>
+                <th className="text-center">Valor</th>
+                <th className="text-center">Total</th>
+                <th className="text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item) => (
+                <tr key={item.id}>
+                  <td>{item.id}</td>
+                  <td>{item.nome}</td>
+                  <td className="text-center">{item.undMedidas}</td>
+                  <td className="text-center">{item.marca}</td>
 
-      {/* Modal para editar item */}
-      {editItem && (
-        <div
-          className={`modal ${modalOpen ? "show" : ""}`}
-          tabIndex={1}
-          style={{ display: modalOpen ? "block" : "none" }}
-        >
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Editar Item</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={handleModalClose}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleEditItem(editItem);
-                  }}
-                >
-                  <div className="mb-3">
-                    <label htmlFor="nome" className="form-label">
-                      Nome
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="nome"
-                      value={editItem.nome}
-                      onChange={(e) =>
-                        setEditItem({ ...editItem, nome: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="marca" className="form-label">
-                      Marca
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="marca"
-                      value={editItem.marca}
-                      onChange={(e) =>
-                        setEditItem({ ...editItem, marca: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="undMedidas" className="form-label">
-                      Unidade de Medida
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="undMedidas"
-                      value={editItem.undMedidas}
-                      onChange={(e) =>
-                        setEditItem({ ...editItem, undMedidas: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="quant_itens" className="form-label">
-                      Quantidade
-                    </label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      id="quant_itens"
-                      value={editItem.quant_itens}
-                      onChange={(e) =>
-                        setEditItem({
-                          ...editItem,
-                          quant_itens: +e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="modal-footer">
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={handleModalClose}
-                    >
-                      Cancelar
-                    </button>
-                    <button type="submit" className="btn btn-primary">
-                      Salvar
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
+                  {/* Edição de Quantidade */}
+                  <td className="text-center">
+                    {editQuantityId === item.id ? (
+                      <div className="d-flex align-items-center justify-content-center">
+                        <Controller
+                          name="quant_itens"
+                          control={control}
+                          render={({ field }) => (
+                            <input
+                              {...field}
+                              type="number"
+                              className="form-control form-control-sm w-25"
+                            />
+                          )}
+                        />
+                        <i
+                          className="bi bi-check text-success cursor-pointer ms-2"
+                          onClick={handleSubmit(handleSaveQuantity)}
+                        ></i>
+                      </div>
+                    ) : (
+                      <div className="d-flex align-items-center justify-content-center">
+                        {item.quant_itens}
+                        <i
+                          className="bi bi-pencil text-primary cursor-pointer ms-2"
+                          onClick={() => handleEditQuantity(item)}
+                        ></i>
+                      </div>
+                    )}
+                  </td>
+
+                  {/* Edição de Valor */}
+                  <td className="text-center">
+                    {editValueId === item.id ? (
+                      <div className="d-flex align-items-center justify-content-center">
+                        <Controller
+                          name="valor_unitario"
+                          control={control}
+                          render={({ field }) => (
+                            <input
+                              {...field}
+                              type="number"
+                              className="form-control form-control-sm w-25"
+                            />
+                          )}
+                        />
+                        <i
+                          className="bi bi-check text-success cursor-pointer ms-2"
+                          onClick={handleSubmit(handleSaveValue)}
+                        ></i>
+                      </div>
+                    ) : (
+                      <div className="d-flex align-items-center justify-content-center">
+                        {item.valor_unitario}
+                        <i
+                          className="bi bi-pencil text-primary cursor-pointer ms-2"
+                          onClick={() => handleEditValue(item)}
+                        ></i>
+                      </div>
+                    )}
+                  </td>
+
+                  <td className="text-center">{item.sub_total_itens}</td>
+                  <td className="text-center">
+                    <i
+                      className="bi bi-trash text-danger cursor-pointer"
+                      onClick={() => handleDelete(item.id)}
+                    ></i>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* Botões abaixo */}
+
+          {/* Botões divididos em 100% da largura */}
+          <div className="d-flex justify-content-between w-100 mt-3">
+            <button
+              className="btn btn-danger me-2"
+              onClick={handleDeleteOrder}
+            >
+              <i className="bi bi-trash me-2"></i>
+              Deletar
+            </button>
+            <button
+              className="btn btn-secondary me-2"
+              onClick={handlePrintOrder}
+            >
+              <i className="bi bi-printer me-2"></i>
+              Imprimir Pedido
+            </button>
+            <button
+              className="btn btn-primary me-2"
+              // onClick={handleFinalizeOrder}
+            >
+              <i className="bi bi-check-circle me-2"></i>
+              Finalizar Pedido
+            </button>
+            <button
+              className="btn btn-success me-2"
+              // onClick={handleFinalizeSale}
+            >
+              <i className="bi bi-cart-check me-2"></i>
+              Finalizar Venda
+            </button>
           </div>
-        </div>
+        </>
       )}
     </>
   );

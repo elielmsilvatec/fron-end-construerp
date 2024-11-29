@@ -9,8 +9,8 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
-import Swal from "sweetalert2";
 import Alert from "@mui/material/Alert";
+import Swal from "sweetalert2";
 
 const style = {
   position: "absolute",
