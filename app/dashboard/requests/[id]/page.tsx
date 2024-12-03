@@ -5,7 +5,10 @@ import { FilePenLine, SaveIcon, Trash2Icon } from "lucide-react";
 import Swal from "sweetalert2";
 import api from "@/app/api/api";
 import SearchProduct from "@/components/resquests/search-product-request";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
+import HandleFinalizeOrder from "@/components/resquests/handleFinalizeOrder";
+import HandleFinalizeSale from "@/components/resquests/handleFinalizeSale";
+import AddClientToOrder from "@/components/resquests/AddClientToOrder";
 
 interface Item {
   id: number;
@@ -18,8 +21,22 @@ interface Item {
   valor_compra: string;
   sub_total_itens: number;
 }
-
+interface Client {
+  // Renamed to singular for consistency
+  id: number;
+  nome: string;
+  telefone: string;
+  cep: string; // Changed to string to handle potential leading zeros
+  rua: string;
+  numero: number | string; // Allow for string if number is not always present
+  bairro: string;
+  cidade: string;
+  observacoes: string;
+}
 const App = ({ params }: { params: Promise<{ id: number }> }) => {
+  const [addClient, setAddClient] = useState(false);
+  const [resquests, setRequests] = useState<Request[]>([]);
+  const [client, setClient] = useState<Client | null>(null); // Renamed to client, and improved type
   const { id } = React.use(params);
   const router = useRouter();
   const [items, setItems] = useState<Item[]>([]);
@@ -40,7 +57,9 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
     try {
       const response = await api(`/pedido/ver/${id}`);
       const data = await response.json();
+      setRequests(data.pedido.valor_total_pedido);
       setItems(data.itemPedido);
+      setClient(data.cliente);
     } catch (error) {
       console.error("Erro ao carregar pedidos:", error);
     }
@@ -142,7 +161,7 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ id: itemId }),
+          body: JSON.stringify({ id: itemId, IDpedido: id }),
         });
         setRefreshItem(!refreshItem);
         Swal.fire("Deletado!", "Item deletado com sucesso!", "success");
@@ -152,53 +171,106 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
       Swal.fire("Erro!", "Erro ao deletar item.", "error");
     }
   };
-//  deletando pedido
-const handleDeleteOrder = async () => {
-  try {
-    const confirmation = await Swal.fire({
-      title: "Tem certeza?",
-      text: "Esta ação não pode ser desfeita.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Sim, deletar!",
-      cancelButtonText: "Cancelar",
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-    });
-    if (confirmation.isConfirmed) {
+  //  deletando pedido
+  const handleDeleteOrder = async () => {
+    try {
+      const confirmation = await Swal.fire({
+        title: "Tem certeza?",
+        text: "Esta ação não pode ser desfeita.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sim, deletar!",
+        cancelButtonText: "Cancelar",
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+      });
+      if (confirmation.isConfirmed) {
+        await api(`/pedido/delet/${id}`);
+        // setRefreshItem(!refreshItem);
+        // faz uma consulta a pedidos depois de excluir
+        const response = await api("/pedido/pedidos");
+        const data = await response.json();
 
-      await api(`/pedido/delet/${id}`);
-      // setRefreshItem(!refreshItem);
-      // faz uma consulta a pedidos depois de excluir
-      const response = await api("/pedido/pedidos");
-      const data = await response.json();
-      
-      router.push('/dashboard/requests/list');
+        router.push("/dashboard/requests/list");
+      }
+    } catch (error) {
+      console.error("Erro ao deletar pedido:", error);
+      Swal.fire("Erro!", "Erro ao deletar pedido.", "error");
     }
-  } catch (error) {
-    console.error("Erro ao deletar pedido:", error);
-    Swal.fire("Erro!", "Erro ao deletar pedido.", "error");
-  }
-}
+  };
 
+  const handlePrintOrder = async () => {
+    try {
+      // Faz uma requisição para a rota no backend
+      let API_BASE_URL: string;
 
-const handlePrintOrder = async () => {
-  try {  
-      await api(`/pedido/imprimir/${id}`);   
-  } catch (error) {
-    console.error("Erro ao imprimir pedido:", error);
-    Swal.fire("Erro!", "Erro ao imprimir pedido.", "error");
-  } 
-}
+      if (process.env.NODE_ENV === "production") {
+        API_BASE_URL = "https://back-end-erp-production.up.railway.app";
+      } else {
+        API_BASE_URL = "http://localhost:5000";
+      }
+      window.location.href = `${API_BASE_URL}/pedido/imprimir/${id}`;
+    } catch (error) {
+      console.error("Erro:", error);
+    }
+  };
+
+  const OpenClientAdd = () => {
+    setAddClient(!addClient);
+  };
   return (
     <>
-      <SearchProduct
-        update_list={() => setRefreshItem(!refreshItem)}
-        id_pedido={id}
-        onSearchTermChange={setSearchTerm}
-      />
+      {client ? (
+        <>{client.nome}</>
+      ) : (
+        <>
+          {addClient ? (
+            // Se addClient for true
+            <>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={OpenClientAdd}
+              >
+                Cancelar
+              </button>
+              <br />
+              <br />
+            </>
+          ) : (
+            // Se addClient for false
+            <>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={OpenClientAdd}
+              >
+                <i className="bi bi-plus-square-dotted"></i> Adicionar cliente
+              </button>
+              <br />
+              <br />
+            </>
+          )}
+        </>
+      )}
 
-      {searchTerm === "" && (
+      {!addClient && (
+        <SearchProduct
+          update_list={() => setRefreshItem(!refreshItem)}
+          id_pedido={id}
+          onSearchTermChange={setSearchTerm}
+        />
+      )}
+
+      {addClient && (
+        <AddClientToOrder
+          id_pedido={id}
+          update={true}
+          setAddClient={setAddClient}
+        />
+      )}
+
+      {searchTerm === "" && addClient === false && (
         <>
           <table className="table table-hover responsive">
             <thead className="thead-light">
@@ -294,15 +366,11 @@ const handlePrintOrder = async () => {
               ))}
             </tbody>
           </table>
-
+          Valor total: {resquests}
           {/* Botões abaixo */}
-
           {/* Botões divididos em 100% da largura */}
           <div className="d-flex justify-content-between w-100 mt-3">
-            <button
-              className="btn btn-danger me-2"
-              onClick={handleDeleteOrder}
-            >
+            <button className="btn btn-danger me-2" onClick={handleDeleteOrder}>
               <i className="bi bi-trash me-2"></i>
               Deletar
             </button>
@@ -313,20 +381,9 @@ const handlePrintOrder = async () => {
               <i className="bi bi-printer me-2"></i>
               Imprimir Pedido
             </button>
-            <button
-              className="btn btn-primary me-2"
-              // onClick={handleFinalizeOrder}
-            >
-              <i className="bi bi-check-circle me-2"></i>
-              Finalizar Pedido
-            </button>
-            <button
-              className="btn btn-success me-2"
-              // onClick={handleFinalizeSale}
-            >
-              <i className="bi bi-cart-check me-2"></i>
-              Finalizar Venda
-            </button>
+
+            <HandleFinalizeOrder id_pedido={id} />
+            <HandleFinalizeSale id_pedido={id} />
           </div>
         </>
       )}
