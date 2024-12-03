@@ -73,11 +73,27 @@ export function Header() {
               Pedidos
             </h5>
           )}
- {pathname.match(/^\/dashboard\/requests\/\d+$/) && (
-  <h5 className="mb-0 ms-0 text-muted fw-bold text-uppercase px-3 py-2">
-    Itens pedido
-  </h5>
-)}
+          {pathname.match(/^\/dashboard\/requests\/\d+$/) && (
+            <h5 className="mb-0 ms-0 text-muted fw-bold text-uppercase px-3 py-2">
+              Itens pedido
+            </h5>
+          )}
+           {pathname === "/dashboard/requests/closed" && (
+            <h5 className="mb-0 ms-0 text-muted fw-bold text-uppercase  px-3 py-2  ">
+              Pedidos finalizados
+            </h5>
+          )}
+ {pathname === "/dashboard/sales/list" && (
+            <h5 className="mb-0 ms-0 text-muted fw-bold text-uppercase  px-3 py-2  ">
+              Vendas pendentes
+            </h5>
+          )}
+
+
+
+
+
+
         </div>
 
         <div className="d-flex align-items-center">

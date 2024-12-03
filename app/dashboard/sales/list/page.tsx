@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import api from "@/app/api/api";
-import { User, PackageOpenIcon } from "lucide-react";
+import { User, PackageOpenIcon, BadgeDollarSign } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -26,7 +26,7 @@ interface Clients {
   observacoes?: string;
 }
 
-export default function Requests() {
+export default function Sales() {
   const [clients, setClients] = useState<Clients[]>([]);
   const [requests, setRequests] = useState<Requests[]>([]);
   const router = useRouter();
@@ -34,7 +34,7 @@ export default function Requests() {
   // Função reutilizável para buscar os pedidos e clientes
   const fetchRequests = async () => {
     try {
-      const response = await api("/pedido/pedidos");
+      const response = await api("/venda/pedido/buscar");
       const data = await response.json();
       setRequests(data.pedidos);
       setClients(data.clientes);
@@ -47,50 +47,11 @@ export default function Requests() {
     fetchRequests(); // Chama a função quando o componente é montado
   }, []);
 
-  const newRequest = async () => {
-    try {
-      const response = await api("/pedido/add_novo", {
-        method: "POST",
-      });
-      const data = await response.json();
-      console.log(data.pedido);
-      router.push(`/dashboard/requests/${data.pedido.id}`);
-      // Após tratar os dados, chama novamente fetchRequests
-      await fetchRequests();
-    } catch (error) {
-      console.error("Erro ao criar novo pedido:", error);
-    }
-  };
+ 
 
   return (
     <>
-      <div className="card-body">
-        <div className="d-flex justify-content-between align-items-center">
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={newRequest}
-          >
-            <i className="bi bi-plus-square-dotted"></i> Novo pedido
-          </button>
-
-       
-
-        <Link href="/dashboard/requests/closed">
-        <button
-            type="button"
-            className="btn btn-secondary"
-          >
-            <i className="bi bi-archive"></i> Pedidos finalizados
-          </button>
-        </Link>
-
-
-
-        </div>
-
-      </div>
-      <br />
+     
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         {Array.isArray(requests) &&
@@ -131,8 +92,8 @@ export default function Requests() {
                     style={{ textDecoration: "none" }}
                   >
                     <div className="flex items-center gap-2 cursor-pointer justify-center ">
-                      <PackageOpenIcon className="text-blue-500" />
-                      <span className="text-blue-500">Abrir pedido</span>
+                      <BadgeDollarSign className="text-blue-500" />
+                      <span className="text-blue-500">Finalizar venda</span>
                     </div>
                   </a>
                 </CardContent>

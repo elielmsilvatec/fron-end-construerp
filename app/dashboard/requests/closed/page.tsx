@@ -34,7 +34,7 @@ export default function Requests() {
   // Função reutilizável para buscar os pedidos e clientes
   const fetchRequests = async () => {
     try {
-      const response = await api("/pedido/pedidos");
+      const response = await api("/pedido/pedidos_fechados");
       const data = await response.json();
       setRequests(data.pedidos);
       setClients(data.clientes);
@@ -64,33 +64,7 @@ export default function Requests() {
 
   return (
     <>
-      <div className="card-body">
-        <div className="d-flex justify-content-between align-items-center">
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={newRequest}
-          >
-            <i className="bi bi-plus-square-dotted"></i> Novo pedido
-          </button>
-
-       
-
-        <Link href="/dashboard/requests/closed">
-        <button
-            type="button"
-            className="btn btn-secondary"
-          >
-            <i className="bi bi-archive"></i> Pedidos finalizados
-          </button>
-        </Link>
-
-
-
-        </div>
-
-      </div>
-      <br />
+     
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         {Array.isArray(requests) &&

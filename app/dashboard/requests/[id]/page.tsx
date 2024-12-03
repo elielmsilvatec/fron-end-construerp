@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { FilePenLine, SaveIcon, Trash2Icon } from "lucide-react";
+import { FilePenLine, SaveIcon, Trash2Icon, DeleteIcon } from "lucide-react";
 import Swal from "sweetalert2";
 import api from "@/app/api/api";
 import SearchProduct from "@/components/resquests/search-product-request";
@@ -37,7 +37,7 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
   const [addClient, setAddClient] = useState(false);
   // const [resquests, setRequests] = useState<Request[]>([]);
   const [requests, setRequests] = useState<number>(0);
-
+  const [requestsClosed, setRequestsClosed] = useState<number>(0);
   const [client, setClient] = useState<Client | null>(null); // Renamed to client, and improved type
   const { id } = React.use(params);
   const router = useRouter();
@@ -60,6 +60,7 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
       const response = await api(`/pedido/ver/${id}`);
       const data = await response.json();
       setRequests(data.pedido.valor_total_pedido);
+      setRequestsClosed(data.pedido.status);
       setItems(data.itemPedido);
       setClient(data.cliente);
     } catch (error) {
@@ -220,12 +221,76 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
   const OpenClientAdd = () => {
     setAddClient(!addClient);
   };
+
+  const deleteClient = async () => {
+    try {
+      const confirmation = await Swal.fire({
+        title: "Deletar cliente?",
+        text: "Esta ação não pode ser desfeita.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sim, deletar!",
+        cancelButtonText: "Cancelar",
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+      });
+
+      if (confirmation.isConfirmed) {
+        const response = await api("/pedido/delet/cliente", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ IDpedido: id }),
+        });
+        if (response.ok) {
+          setRefreshItem(!refreshItem);
+          Swal.fire("Deletado!", "Cliente deletado com sucesso!", "success");
+        } else {
+          Swal.fire("Erro!", "Erro ao deletar cliente.", "error");
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao deletar cliente:", error);
+      Swal.fire("Erro!", "Erro ao deletar cliente.", "error");
+    }
+  };
+
+  // formatando em BRL
+  const formatToBRL = (value: number): string => {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(value);
+  };
+
   return (
     <>
+      {/* se existe cliente mostra */}
       {client ? (
-        <>{client.nome}</>
+        <>
+          <div className="card mb-3">
+            {" "}
+            <div className="card-body position-relative">
+              {" "}
+              <DeleteIcon
+                className="position-absolute top-0 end-0 m-2 cursor-pointer text-danger"
+                onClick={() => deleteClient()}
+              />{" "}
+              <h5 className="card-title">{client.nome}</h5>{" "}
+              <p className="card-text">
+                {" "}
+                <strong>Telefone:</strong> {client.telefone} <br />{" "}
+                <strong>Endereço:</strong> Rua {client.rua}, {client.numero}{" "}
+                {client.bairro}, {client.cidade} - {client.cep} <br />{" "}
+                <strong>Observações:</strong> {client.observacoes}{" "}
+              </p>{" "}
+            </div>{" "}
+          </div>
+        </>
       ) : (
         <>
+          {/* se não existe cliente */}
           {addClient ? (
             // Se addClient for true
             <>
@@ -269,6 +334,7 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
           id_pedido={id}
           update={true}
           setAddClient={setAddClient}
+          update_list={() => setRefreshItem(!refreshItem)}
         />
       )}
 
@@ -357,7 +423,9 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
                     )}
                   </td>
 
-                  <td className="text-center">{item.sub_total_itens}</td>
+                  <td className="text-center">
+                    {formatToBRL(item.sub_total_itens)}
+                  </td>
                   <td className="text-center">
                     <i
                       className="bi bi-trash text-danger cursor-pointer"
@@ -368,7 +436,20 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
               ))}
             </tbody>
           </table>
-          Valor total: {requests}
+
+          <div className="card mb-3">
+            <div className="card-body">
+              <div className="d-flex justify-content-between align-items-center">
+                <p className="mb-0">
+                  <strong>Valor total:</strong>
+                </p>
+                <div className="text-lg font-bold text-green-600">
+                  {formatToBRL(requests)}
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Botões abaixo */}
           {/* Botões divididos em 100% da largura */}
           <div className="d-flex justify-content-between w-100 mt-3">
@@ -384,7 +465,8 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
               Imprimir Pedido
             </button>
 
-            <HandleFinalizeOrder id_pedido={id} />
+            {/* se o pedido não estiver finalizado */}
+            {requestsClosed !== 2 && <HandleFinalizeOrder id_pedido={id} />}
             <HandleFinalizeSale id_pedido={id} />
           </div>
         </>

@@ -10,7 +10,7 @@ const sidebarItems = [
   { icon: "bi bi-box-seam", label: "Produtos", href: "/dashboard/products/list" },
   { icon: "bi bi-people-fill", label: "Clientes", href: "/dashboard/clients/list" },
   { icon: "bi bi-cart-fill", label: "Pedidos", href: "/dashboard/requests/list" },
-  { icon: "bi bi-cash-stack", label: "Vendas", href: "/dashboard/sales" },
+  { icon: "bi bi-cash-stack", label: "Vendas", href: "/dashboard/sales/list" },
   { icon: "bi bi-truck", label: "Entregas", href: "/dashboard/deliveries" },
   { icon: "bi bi-clipboard-check", label: "Relatórios", href: "/dashboard/reports" },
   { icon: "bi bi-cash-stack", label: "Financeiro", href: "/dashboard/financial" },

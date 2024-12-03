@@ -19,6 +19,7 @@ interface Clients {
 interface ClientsListProps {
     update: boolean; // Permite true ou false
     id_pedido: number;
+    update_list: () => void;
     setAddClient: React.Dispatch<React.SetStateAction<boolean>>; // Adiciona a tipagem
 }
 
@@ -26,6 +27,7 @@ const AddClientToOrder: React.FC<ClientsListProps> = ({
   update,
   id_pedido,
   setAddClient,
+  update_list,
 }: ClientsListProps) => {
   const [clients, setClients] = useState<Clients[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +81,8 @@ const AddClientToOrder: React.FC<ClientsListProps> = ({
       setSearchTerm(""); // Limpa o campo de busca
       update = !update;
       setAddClient(false); // Oculta o formulário
-      router.push(`/dashboard/requests/${id_pedido}`);
+      update_list();
+      // router.push(`/dashboard/requests/${id_pedido}`);
     } catch (err) {
       console.error("Erro ao adicionar cliente:", err);
     }
