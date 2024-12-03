@@ -35,7 +35,9 @@ interface Client {
 }
 const App = ({ params }: { params: Promise<{ id: number }> }) => {
   const [addClient, setAddClient] = useState(false);
-  const [resquests, setRequests] = useState<Request[]>([]);
+  // const [resquests, setRequests] = useState<Request[]>([]);
+  const [requests, setRequests] = useState<number>(0);
+
   const [client, setClient] = useState<Client | null>(null); // Renamed to client, and improved type
   const { id } = React.use(params);
   const router = useRouter();
@@ -366,7 +368,7 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
               ))}
             </tbody>
           </table>
-          Valor total: {resquests}
+          Valor total: {requests}
           {/* Botões abaixo */}
           {/* Botões divididos em 100% da largura */}
           <div className="d-flex justify-content-between w-100 mt-3">
