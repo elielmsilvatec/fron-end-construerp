@@ -163,7 +163,7 @@ const ProductList: React.FC<ProductListProps> = ({ refreshProducts }: ProductLis
 
               {/* essa div abaixo é para adicionar os botões um ao lado do outro */}
               <div className="flex flex-row justify-center items-center gap-4">
-                <EditProduct id={product.id} />
+                <EditProduct id={product.id} updateProductList={updateProductList}/>
                 {/* Passe a função updateProductList para o ViewProduct */}
                 <ViewProduct id={product.id} updateProductList={updateProductList} />
               </div>

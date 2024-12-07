@@ -42,7 +42,7 @@ const ProductNew: React.FC<ProductNewProps> = ({ onProductAdded }) => {
   const [valorCompra, setValorCompra] = useState("");
   const [valorVenda, setValorVenda] = useState("");
   const [observacoes, setObservacoes] = useState("");
-  const [refreshProducts, setRefreshProducts] = useState(false); // Add a refresh state
+  // const [refreshProducts, setRefreshProducts] = useState(false); // Add a refresh state
 
   const handleModalOpen = () => setModalOpen(true);
   const handleModalClose = () => {
@@ -55,6 +55,11 @@ const ProductNew: React.FC<ProductNewProps> = ({ onProductAdded }) => {
     setErrorMessage("");
 
     try {
+      if (valorCompra > valorVenda) {
+        alert("O valor de compra não pode ser maior que o valor de venda.");
+        return;
+      }
+
       const response = await api("/produtos/save", {
         method: "POST",
         body: JSON.stringify({
@@ -75,7 +80,7 @@ const ProductNew: React.FC<ProductNewProps> = ({ onProductAdded }) => {
         onProductAdded(); // Notifica o pai que o produto foi adicionado
         const resp = await response.json();
         console.log(resp);
-        setRefreshProducts(true); // Trigger re-render in ProductList
+        // setRefreshProducts(true); // Trigger re-render in ProductList
         handleModalClose(); //Close the modal
         await Swal.fire({
           title: "Sucesso!",

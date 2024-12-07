@@ -35,7 +35,7 @@ const HandleFinalizeSale: React.FC<Props> = ({ id_pedido }: Props) => {
         });
 
         if (response.ok && response.status === 200) {
-          router.push("http://localhost:3000/dashboard/sales");
+          router.push(`/dashboard/sales/${id_pedido}`);
         }
       }
     } catch (error) {

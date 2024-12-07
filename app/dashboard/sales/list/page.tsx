@@ -88,7 +88,7 @@ export default function Sales() {
                   </p>
 
                   <a
-                    href={`/dashboard/requests/${request.id}`}
+                    href={`/dashboard/sales/${request.id}`}
                     style={{ textDecoration: "none" }}
                   >
                     <div className="flex items-center gap-2 cursor-pointer justify-center ">

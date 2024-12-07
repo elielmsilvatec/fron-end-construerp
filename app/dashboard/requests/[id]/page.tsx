@@ -457,17 +457,22 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
               <i className="bi bi-trash me-2"></i>
               Deletar
             </button>
-            <button
-              className="btn btn-secondary me-2"
-              onClick={handlePrintOrder}
-            >
-              <i className="bi bi-printer me-2"></i>
-              Imprimir Pedido
-            </button>
+            {/* se o valor total do pedido for maior que 0 mostra os botões */}
+            {requests !== 0 && (
+              <>
+                <button
+                  className="btn btn-secondary me-2"
+                  onClick={handlePrintOrder}
+                >
+                  <i className="bi bi-printer me-2"></i>
+                  Imprimir Pedido
+                </button>
 
-            {/* se o pedido não estiver finalizado */}
-            {requestsClosed !== 2 && <HandleFinalizeOrder id_pedido={id} />}
-            <HandleFinalizeSale id_pedido={id} />
+                {/* se o pedido não estiver finalizado e valor */}
+                {requestsClosed !== 2 && <HandleFinalizeOrder id_pedido={id} />}
+                <HandleFinalizeSale id_pedido={id} />
+              </>
+            )}
           </div>
         </>
       )}
