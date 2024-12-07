@@ -6,7 +6,8 @@ import { useForm, Controller } from "react-hook-form";
 import LinstItens from "@/components/sales/listSalesProduct";
 import Swal from "sweetalert2";
 import api from "@/app/api/api";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
+import ListClient from "@/components/sales/listClient";
 
 type FormData = {
   desconto: string;
@@ -29,6 +30,7 @@ const SalesItem = ({ params }: { params: Promise<{ id: number }> }) => {
   const [valorPedido, setValorPedido] = useState<number | null>(100); // Valor do pedido
   const [valorPago, setValorPago] = useState<number | null>(null); // Valor pago
   const [troco, setTroco] = useState<number | null>(null); // Troco
+  const [valorFinal, setValorFinal] = useState<number | null>(valorPedido);
 
   const {
     control,
@@ -137,8 +139,8 @@ const SalesItem = ({ params }: { params: Promise<{ id: number }> }) => {
         icon: "success",
         confirmButtonText: "OK",
         confirmButtonColor: "#4CAF50",
-      });      
-      router.push('/dashboard/sales/list');
+      });
+      router.push("/dashboard/sales/list");
     }
   };
 
@@ -147,6 +149,15 @@ const SalesItem = ({ params }: { params: Promise<{ id: number }> }) => {
     const numericValue = parseFloat(value.replace(",", ".")); // Converte para número
     setValorPago(isNaN(numericValue) ? null : numericValue);
   };
+  // calcula valor final
+  useEffect(() => {
+    const desconto = parseFloat(getValues("desconto").replace(",", ".")) || 0;
+    const taxas = parseFloat(getValues("taxas").replace(",", ".")) || 0;
+
+    const novoValorFinal = valorPedido ? valorPedido - desconto + taxas : 0;
+    setValorFinal(novoValorFinal);
+  }, [valorPedido, watch("desconto"), watch("taxas")]);
+
   // Atualiza o troco automaticamente sempre que o valor pago ou pedido mudar
   useEffect(() => {
     if (valorPedido !== null && valorPago !== null) {
@@ -175,8 +186,9 @@ const SalesItem = ({ params }: { params: Promise<{ id: number }> }) => {
             style={{ margin: "10px" }}
             disabled
           >
-            Valor final: R$: XXXX
+            Valor final: R$ {valorFinal?.toFixed(2)}
           </button>
+
           <button
             type="button"
             className="btn btn-success flex-fill"
@@ -192,13 +204,8 @@ const SalesItem = ({ params }: { params: Promise<{ id: number }> }) => {
       </div>
 
       <div className="col-4">
-        <Link href={`/dashboard/requests/${id}`}>
-          <h3>
-            <button type="button" className="btn btn-link">
-              Click aqui para adicionar um cliente!
-            </button>
-          </h3>
-        </Link>
+        <ListClient id={id} />
+
         <div className="d-flex justify-content-between">
           <button
             type="button"

@@ -34,7 +34,7 @@ export default function Sales() {
   // Função reutilizável para buscar os pedidos e clientes
   const fetchRequests = async () => {
     try {
-      const response = await api("/venda/pedido/buscar");
+      const response = await api("/venda/vendas_finalizadas");
       const data = await response.json();
       setRequests(data.pedidos);
       setClients(data.clientes);
@@ -50,9 +50,7 @@ export default function Sales() {
   return (
     <>
 
-<div className="alert alert" role="alert">
- Visualizar <a href="/dashboard/sales/closed" className="alert-link"> vendas finalizadas</a>. 
-</div>
+
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         {Array.isArray(requests) &&
@@ -80,6 +78,9 @@ export default function Sales() {
                   <p className="text-gray-600 mb-2">Pedido ID: {request.id}</p>
                   <p className="text-gray-400 mb-2">
                     Número do Pedido: {request.num_pedido}
+                  </p>
+                  <p className="text-gray-400 mb-2">
+                    Data da venda: {request.num_pedido}
                   </p>
                   <p className="text-lg font-bold text-green-600">
                     {new Intl.NumberFormat("pt-BR", {
