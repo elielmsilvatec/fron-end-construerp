@@ -3,106 +3,156 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import api from "@/app/api/api";
-import { User, PackageOpenIcon, BadgeDollarSign } from "lucide-react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { User, BadgeDollarSign } from "lucide-react";
 
-interface Requests {
-  id: number;
-  num_pedido: number;
-  status?: number;
-  valor_total_pedido?: string;
-  cliente_pedido: number;
-}
 interface Clients {
   id: number;
   nome: string;
-  telefone: string;
-  cep?: string;
-  rua?: string;
-  numero?: number;
-  bairro?: string;
-  cidade?: string;
-  observacoes?: string;
+}
+
+interface Sales {
+  id: number;
+  cliente_id: number; // ID do cliente associado à venda
+  data_venda: string;
+  valor_total_venda: number;
 }
 
 export default function Sales() {
   const [clients, setClients] = useState<Clients[]>([]);
-  const [requests, setRequests] = useState<Requests[]>([]);
-  const router = useRouter();
+  const [sales, setSales] = useState<Sales[]>([]);
+  const [data_inicial, setDataInicial] = useState<string>(""); // Estado para data inicial
+  const [data_final, setDataFinal] = useState<string>(""); // Estado para data final
+  const [isFiltered, setIsFiltered] = useState<boolean>(false); // Estado para saber se está filtrado
+  const [erroMsg, setErroMsg] = useState<string>("");
 
-  // Função reutilizável para buscar os pedidos e clientes
-  const fetchRequests = async () => {
+  const fetchData = async () => {
     try {
       const response = await api("/venda/vendas_finalizadas");
       const data = await response.json();
-      setRequests(data.pedidos);
-      setClients(data.clientes);
+      setSales(data.venda_finalizada || []);
+      setClients(data.clientes || []);
+      setIsFiltered(false); // Reseta o estado de filtro ao carregar os dados iniciais
     } catch (error) {
-      console.error("Erro ao buscar pedidos:", error);
+      console.error("Erro ao buscar dados:", error);
     }
   };
 
+  const fetchFilteredData = async () => {
+    try {
+      const response = await api("/venda/vendas_finalizadas/buscar", {
+        method: "POST",
+        body: JSON.stringify({ data_inicial, data_final }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+      console.log("Data-->>>>>", data);
+
+      if (data.error) {
+        setErroMsg(data.error);
+        handleClearFilters();
+      } else {
+        setSales(data.venda_finalizada || []);
+        setIsFiltered(true);
+        setErroMsg("");
+      }
+    } catch (error) {
+      console.error("Erro ao buscar dados filtrados:", error);
+      handleClearFilters();
+    }
+  };
+
+  const handleClearFilters = () => {
+    setDataInicial("");
+    setDataFinal("");
+    fetchData();
+  };
+
   useEffect(() => {
-    fetchRequests(); // Chama a função quando o componente é montado
+    fetchData(); // Carrega os dados iniciais ao montar o componente
   }, []);
 
+  const getClientName = (clientId: number): string => {
+    const client = clients.find((c) => c.id === clientId);
+    return client ? client.nome : "Cliente não encontrado";
+  };
+
   return (
-    <>
+    <div>
 
+  {erroMsg && (
+  <div className="alert alert-danger alert-dismissible fade show" role="alert">
+    {erroMsg}
+    <button
+      type="button"
+      className="btn-close"
+      data-bs-dismiss="alert"
+      aria-label="Close"
+      onClick={() => setErroMsg("")}
+    ></button>
+  </div>
+)}
 
+      {/* Filtros */}
+      <div className="flex items-center gap-4 mb-6">
+        <input
+          type="date"
+          value={data_inicial}
+          onChange={(e) => setDataInicial(e.target.value)}
+          className="border rounded px-3 py-2"
+          placeholder="Data Inicial"
+        />
+        <input
+          type="date"
+          value={data_final}
+          onChange={(e) => setDataFinal(e.target.value)}
+          className="border rounded px-3 py-2"
+          placeholder="Data Final"
+        />
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {Array.isArray(requests) &&
-          requests.map((request) => {
-            const valor_pedido = parseFloat(request.valor_total_pedido || "");
-
-            // Encontrar o cliente correspondente
-            const cliente = clients.find(
-              (c) => c.id === request.cliente_pedido
-            );
-            const nomeCliente = cliente ? cliente.nome : "....";
-
-            return (
-              <Card
-                key={request.id}
-                className="hover:shadow-lg transition-shadow"
-              >
-                <CardHeader className="flex flex-row items-center space-x-4 pb-2">
-                  <User className="h-6 w-6 text-blue-500" />
-                  <CardTitle className="text-lg font-semibold">
-                    {nomeCliente}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600 mb-2">Pedido ID: {request.id}</p>
-                  <p className="text-gray-400 mb-2">
-                    Número do Pedido: {request.num_pedido}
-                  </p>
-                  <p className="text-gray-400 mb-2">
-                    Data da venda: {request.num_pedido}
-                  </p>
-                  <p className="text-lg font-bold text-green-600">
-                    {new Intl.NumberFormat("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    }).format(valor_pedido)}
-                  </p>
-
-                  <a
-                    href={`/dashboard/sales/${request.id}`}
-                    style={{ textDecoration: "none" }}
-                  >
-                    <div className="flex items-center gap-2 cursor-pointer justify-center ">
-                      <BadgeDollarSign className="text-blue-500" />
-                      <span className="text-blue-500">Finalizar venda</span>
-                    </div>
-                  </a>
-                </CardContent>
-              </Card>
-            );
-          })}
+        {isFiltered ? (
+          <button
+            onClick={handleClearFilters}
+            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+          >
+            Limpar Filtros
+          </button>
+        ) : (
+          <button
+            onClick={fetchFilteredData}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            Filtrar
+          </button>
+        )}
       </div>
-    </>
+
+      {/* Lista de vendas */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {sales.map((sale) => (
+          <Card key={sale.id} className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center space-x-4 pb-2">
+              <User className="h-6 w-6 text-blue-500" />
+              <CardTitle className="text-lg font-semibold">
+                {getClientName(sale.cliente_id)}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 mb-2">
+                Data da Venda: {sale.data_venda}
+              </p>
+              <p className="text-lg font-bold text-green-600">
+                {new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(sale.valor_total_venda)}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
   );
 }

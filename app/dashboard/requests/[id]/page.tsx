@@ -282,7 +282,7 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
               <h5 className="card-title">{client.nome}</h5>{" "}
               <p className="card-text">
                 {" "}
-                <strong>Telefone:</strong> {client.telefone} <br />{" "}
+                <strong>Telefone:</strong> {client.telefone} {" "}
                 <strong>Endereço:</strong> Rua {client.rua}, {client.numero}{" "}
                 {client.bairro}, {client.cidade} - {client.cep} <br />{" "}
                 <strong>Observações:</strong> {client.observacoes}{" "}
@@ -349,8 +349,8 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
                 <th>Nome</th>
                 <th className="text-center">Medida</th>
                 <th className="text-center">Marca</th>
-                <th className="text-center">Quantidade</th>
-                <th className="text-center">Valor</th>
+                <th className="text-center">Qtd.</th>
+                <th className="text-center">Preço</th>
                 <th className="text-center">Total</th>
                 <th className="text-center">Ações</th>
               </tr>

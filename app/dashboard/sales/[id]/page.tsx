@@ -170,7 +170,21 @@ const SalesItem = ({ params }: { params: Promise<{ id: number }> }) => {
   return (
     <div className="row">
       <div className="col-8">
-        {erroMsg && <div className="alert alert-danger">{erroMsg}</div>}
+        {erroMsg && (
+          <div
+            className="alert alert-danger alert-dismissible fade show"
+            role="alert"
+          >
+            {erroMsg}
+            <button
+              type="button"
+              className="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+              onClick={() => setErroMsg("")}
+            ></button>
+          </div>
+        )}
         <div className="d-flex">
           <button
             type="button"
