@@ -88,7 +88,7 @@ const EditProduct = ({ id , onProductUpdated}: Props) => {
           confirmButtonText: "OK",
           confirmButtonColor: "#4CAF50",
         });
-        onProductUpdated(id);
+        onProductUpdated();
       } else {
         setErro("Falha ao atualizar o produto.");
         throw new Error("Falha ao atualizar o produto.");
