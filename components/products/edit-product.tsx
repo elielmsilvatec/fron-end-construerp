@@ -32,7 +32,7 @@ const style = {
 // Props recebendo o ID do produto
 type Props = {
   id: number;
-  updateProductList: (deletedProductId: number) => void; // Recebe a função como prop
+  onProductUpdated: () => void;
 };
 
 type Produto = {
@@ -45,7 +45,7 @@ type Produto = {
   observacoes: string;
 };
 
-const EditProduct = ({ id , updateProductList}: Props) => {
+const EditProduct = ({ id , onProductUpdated}: Props) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
@@ -88,7 +88,7 @@ const EditProduct = ({ id , updateProductList}: Props) => {
           confirmButtonText: "OK",
           confirmButtonColor: "#4CAF50",
         });
-        updateProductList(id);
+        onProductUpdated(id);
       } else {
         setErro("Falha ao atualizar o produto.");
         throw new Error("Falha ao atualizar o produto.");
