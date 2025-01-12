@@ -49,7 +49,7 @@ const SalesItem = ({ params }: { params: Promise<{ id: number }> }) => {
       valorPago: "",
       entregar: "0",
       dataEntrega: "",
-      imprimir: "0",
+      imprimir: 0,
     },
   });
 
