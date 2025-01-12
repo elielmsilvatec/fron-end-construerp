@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { FilePenLine, SaveIcon, Trash2Icon, DeleteIcon } from "lucide-react";
+import { FilePenLine, SaveIcon, ArrowLeft, DeleteIcon } from "lucide-react";
 import Swal from "sweetalert2";
 import api from "@/app/api/api";
 import SearchProduct from "@/components/resquests/search-product-request";
@@ -268,6 +268,16 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
 
   return (
     <>
+          <div className="mb-3">
+        <button
+          onClick={() => router.back()}
+          className="btn btn-link text-decoration-none"
+        >
+          <ArrowLeft className="me-2" size={20} />
+          {/* Voltar */}
+        </button>
+      </div>
+
       {/* se existe cliente mostra */}
       {client ? (
         <>

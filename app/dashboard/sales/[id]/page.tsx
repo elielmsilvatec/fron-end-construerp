@@ -17,6 +17,7 @@ type FormData = {
   valorPago: string;
   entregar: string;
   dataEntrega: string;
+  imprimir: number;
 };
 
 const SalesItem = ({ params }: { params: Promise<{ id: number }> }) => {
@@ -48,11 +49,13 @@ const SalesItem = ({ params }: { params: Promise<{ id: number }> }) => {
       valorPago: "",
       entregar: "0",
       dataEntrega: "",
+      imprimir: "0",
     },
   });
 
   const formaPagamento = watch("formaPagamento");
   const entregar = watch("entregar");
+  const imprimir = watch("imprimir");
 
   useEffect(() => {
     setShowParcelas(formaPagamento === "Crédito");
@@ -108,14 +111,12 @@ const SalesItem = ({ params }: { params: Promise<{ id: number }> }) => {
     }
     if (parseFloat(data.valorPago) < pedido.pedido.valor_total_pedido) {
       setErroMsg("O valor pago não pode ser menor que o valor da compra.");
-      setErroMsg("O desconto não pode ser maior que 25% do valor da compra.");
       const timer = setTimeout(() => {
         setErroMsg(null);
       }, 4000);
       return () => clearTimeout(timer); // Limpa o timer se o componente desmontar
     }
 
-    console.log(venda.venda.lucro);
     const lucro = venda.venda.lucro;
     const response = await api("/venda/pedido/finalizar", {
       method: "POST",
@@ -133,6 +134,18 @@ const SalesItem = ({ params }: { params: Promise<{ id: number }> }) => {
     });
     const vendaFinalizada = await response.json();
     if (response.ok && response.status === 200) {
+      if (Number(imprimir) === 1) {
+        // Faz uma requisição para a rota no backend
+        let API_BASE_URL: string;
+
+        if (process.env.NODE_ENV === "production") {
+          API_BASE_URL = "https://back-end-erp-production.up.railway.app";
+        } else {
+          API_BASE_URL = "http://localhost:5000";
+        }
+        window.location.href = `${API_BASE_URL}/venda/imprimir/${IDpedido}`;
+      }
+
       Swal.fire({
         title: "Venda finalizada!",
         text: "Sua venda foi finalizada com sucesso!",
@@ -400,6 +413,20 @@ const SalesItem = ({ params }: { params: Promise<{ id: number }> }) => {
               )}
             </div>
           )}
+
+          <div className="form-group">
+            <label htmlFor="imprimir">Deseja imprimir: </label>
+            <Controller
+              name="imprimir"
+              control={control}
+              render={({ field }) => (
+                <select {...field} id="imprimir" className="form-select">
+                  <option value="0">Não</option>
+                  <option value="1">Sim</option>
+                </select>
+              )}
+            />
+          </div>
 
           <br />
           <button type="submit" className="btn btn-success">

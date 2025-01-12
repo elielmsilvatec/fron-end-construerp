@@ -88,9 +88,20 @@ export function Header() {
               Vendas pendentes
             </h5>
           )}
-            {pathname.match(/^\/dashboard\/sales\/\d+$/) && (
+          {pathname.match(/^\/dashboard\/sales\/\d+$/) && (
             <h5 className="mb-0 ms-0 text-muted fw-bold text-uppercase px-3 py-2">
-             Caixa
+              Caixa
+            </h5>
+          )}
+
+          {pathname === "/dashboard/sales/closed" && (
+            <h5 className="mb-0 ms-0 text-muted fw-bold text-uppercase px-3 py-2">
+              Vendas finalizadas
+            </h5>
+          )}
+          {pathname.match(/^\/dashboard\/sales\/finalized\/\d+$/) && (
+            <h5 className="mb-0 ms-0 text-muted fw-bold text-uppercase px-3 py-2">
+              Vendas finalizadas
             </h5>
           )}
         </div>

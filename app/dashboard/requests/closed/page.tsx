@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import api from "@/app/api/api";
-import { User, PackageOpenIcon } from "lucide-react";
+import { User, PackageOpenIcon, FullscreenIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -105,8 +105,8 @@ export default function Requests() {
                     style={{ textDecoration: "none" }}
                   >
                     <div className="flex items-center gap-2 cursor-pointer justify-center ">
-                      <PackageOpenIcon className="text-blue-500" />
-                      <span className="text-blue-500">Abrir pedido</span>
+                      <FullscreenIcon className="text-blue-500" />
+                      <span className="text-blue-500">Vizualizar pedido</span>
                     </div>
                   </a>
                 </CardContent>
