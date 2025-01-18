@@ -90,6 +90,7 @@ const Finalized = ({ params }: { params: Promise<{ id: number }> }) => {
     try {
       const response = await api(`/venda/ver/${id}`);
       const data = (await response.json()) as DataResponse;
+         console.log("Dados recebidos:", data);
       setData(data);
     } catch (error) {
       console.error("Erro ao buscar pedidos:", error);
@@ -98,18 +99,22 @@ const Finalized = ({ params }: { params: Promise<{ id: number }> }) => {
 
   useEffect(() => {
     fetchRequests();
-  }, []);
+  }, [id]);
 
-  const formatDate = (dateString: string | Date): string => {
+    const formatDate = (dateString: string | Date | undefined): string => {
     try {
-      const date =
-        typeof dateString === "string" ? new Date(dateString) : dateString;
-      return format(date, "dd/MM/yyyy HH:mm", { locale: ptBR });
+        if (!dateString) {
+            return "Data inválida";
+        }
+        const date =
+            typeof dateString === "string" ? new Date(dateString) : dateString;
+              console.log("Data a formatar", date);
+        return format(date, "dd/MM/yyyy HH:mm", { locale: ptBR });
     } catch (error) {
-      console.error("Error formatting date:", error);
-      return "Data inválida";
+        console.error("Error formatting date:", error);
+        return "Data inválida";
     }
-  };
+};
 
   if (!data) {
     return (
@@ -120,7 +125,6 @@ const Finalized = ({ params }: { params: Promise<{ id: number }> }) => {
   }
 
   const handleCancelSale = async () => {
-    // Implementar lógica de cancelamento aqui
     const confirmation = await Swal.fire({
       title: "Tem certeza?",
       text: "Esta ação não pode ser desfeita.",
@@ -143,7 +147,7 @@ const Finalized = ({ params }: { params: Promise<{ id: number }> }) => {
         cancelButtonColor: "#3085d6",
       });
       if (confirmation.isConfirmed) {
-        const response = await api(`/vendas/deletar/${data.venda.id}`, {
+        const response = await api(`/vendas/deletar/${data.venda?.id}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -158,11 +162,9 @@ const Finalized = ({ params }: { params: Promise<{ id: number }> }) => {
         }
       }
     }
-    // router.back();
   };
 
   const handlePrintSale = () => {
-    // Implementar lógica de impressão aqui
     let API_BASE_URL: string;
 
     if (process.env.NODE_ENV === "production") {
@@ -181,7 +183,6 @@ const Finalized = ({ params }: { params: Promise<{ id: number }> }) => {
           className="btn btn-link text-decoration-none"
         >
           <ArrowLeft className="me-2" size={20} />
-          {/* Voltar */}
         </button>
       </div>
 
@@ -193,43 +194,43 @@ const Finalized = ({ params }: { params: Promise<{ id: number }> }) => {
           <div className="row">
             <div className="col-12 col-md-6">
               <p className="mb-2">
-                <span className="fw-medium">Nome:</span> {data.cliente.nome}
+                <span className="fw-medium">Nome:</span> {data.cliente?.nome}
               </p>
               <p className="mb-2">
                 <span className="fw-medium">Telefone:</span>{" "}
-                {data.cliente.telefone}
+                {data.cliente?.telefone}
               </p>
-              {data.cliente.cep && (
+              {data.cliente?.cep && (
                 <p className="mb-2">
                   <span className="fw-medium">CEP:</span> {data.cliente.cep}
                 </p>
               )}
-              {data.cliente.rua && (
+              {data.cliente?.rua && (
                 <p className="mb-2">
                   <span className="fw-medium">Rua:</span> {data.cliente.rua}
                 </p>
               )}
             </div>
             <div className="col-12 col-md-6">
-              {data.cliente.numero && (
+              {data.cliente?.numero && (
                 <p className="mb-2">
                   <span className="fw-medium">Número:</span>{" "}
                   {data.cliente.numero}
                 </p>
               )}
-              {data.cliente.bairro && (
+              {data.cliente?.bairro && (
                 <p className="mb-2">
                   <span className="fw-medium">Bairro:</span>{" "}
                   {data.cliente.bairro}
                 </p>
               )}
-              {data.cliente.cidade && (
+              {data.cliente?.cidade && (
                 <p className="mb-2">
                   <span className="fw-medium">Cidade:</span>{" "}
                   {data.cliente.cidade}
                 </p>
               )}
-              {data.cliente.observacoes && (
+              {data.cliente?.observacoes && (
                 <p className="mb-2">
                   <span className="fw-medium">Observações:</span>{" "}
                   {data.cliente.observacoes}
@@ -250,27 +251,27 @@ const Finalized = ({ params }: { params: Promise<{ id: number }> }) => {
           <div className="col-12 col-md-6">
             <p className="mb-2">
               <span className="fw-medium">Número:</span>{" "}
-              {data.pedido.num_pedido}
+              {data.pedido?.num_pedido}
             </p>
             <p className="mb-2">
               <span className="fw-medium">Status:</span>
               <span
                 className={`badge ms-1
                                         ${
-                                          data.pedido.status === 1
+                                          data.pedido?.status === 1
                                             ? "bg-warning"
-                                            : data.pedido.status === 2
+                                            : data.pedido?.status === 2
                                             ? "bg-primary"
-                                            : data.pedido.status === 3
+                                            : data.pedido?.status === 3
                                             ? "bg-success"
                                             : "bg-secondary"
                                         }`}
               >
-                {data.pedido.status === 1
+                {data.pedido?.status === 1
                   ? "Pendente"
-                  : data.pedido.status === 2
+                  : data.pedido?.status === 2
                   ? "Em Andamento"
-                  : data.pedido.status === 3
+                  : data.pedido?.status === 3
                   ? "Finalizado"
                   : "Desconhecido"}
               </span>
@@ -279,11 +280,11 @@ const Finalized = ({ params }: { params: Promise<{ id: number }> }) => {
           <div className="col-12 col-md-6">
             <p className="mb-2">
               <span className="fw-medium">Data:</span>{" "}
-              {formatDate(data.pedido.createdAt)}
+              {formatDate(data.pedido?.createdAt)}
             </p>
             <p>
-              <span className="fw-medium">Valor Total:</span> R${" "}
-              {data.pedido.valor_total_pedido?.toFixed(2)}
+              <span className="fw-medium">Valor Total:</span> R$
+              {data.pedido?.valor_total_pedido?.toFixed(2)}
             </p>
           </div>
         </div>
@@ -304,7 +305,7 @@ const Finalized = ({ params }: { params: Promise<{ id: number }> }) => {
               </tr>
             </thead>
             <tbody>
-              {data.itemPedido.map((item) => (
+              {data.itemPedido?.map((item) => (
                 <tr key={item.id}>
                   <td>{item.nome}</td>
                   <td>{item.quant_itens}</td>
@@ -325,30 +326,30 @@ const Finalized = ({ params }: { params: Promise<{ id: number }> }) => {
           <div className="col-12 col-md-6">
             <p className="mb-2">
               <span className="fw-medium">Número:</span>{" "}
-              {data.venda.numero_pedido}
+              {data.venda?.numero_pedido}
             </p>
             <p className="mb-2">
               <span className="fw-medium">Data:</span>{" "}
-              {formatDate(data.venda.data_venda)}
+                {formatDate(data.venda?.data_venda)}
             </p>
             <p className="mb-2">
               <span className="fw-medium">Pagamento:</span>{" "}
-              {data.venda.tipo_pagamento}
+              {data.venda?.tipo_pagamento}
             </p>
           </div>
           <div className="col-12 col-md-6">
             <p className="mb-2">
               <span className="fw-medium">Parcelas:</span>{" "}
-              {data.venda.quant_parcelas}
+              {data.venda?.quant_parcelas}
             </p>
             <p className="mb-2">
               <span className="fw-medium">Entrega:</span>{" "}
-              {data.venda.entrega === 1 ? "Sim" : "Não"}
+              {data.venda?.entrega === 1 ? "Sim" : "Não"}
             </p>
-            {data.venda.entrega === 1 && (
+            {data.venda?.entrega === 1 && (
               <p className="mb-2">
                 <span className="fw-medium">Data de Entrega:</span>{" "}
-                {formatDate(data.venda.data_entrega)}
+                {formatDate(data.venda?.data_entrega)}
               </p>
             )}
           </div>
@@ -356,30 +357,29 @@ const Finalized = ({ params }: { params: Promise<{ id: number }> }) => {
         <div className="row mt-3">
           <div className="col-12 col-md-6">
             <p className="mb-2">
-              <span className="fw-medium">Desconto:</span> R${" "}
-              {data.venda.desconto.toFixed(2)}
+              <span className="fw-medium">Desconto:</span> R$
+              {data.venda?.desconto?.toFixed(2)}
             </p>
             <p className="mb-2">
-              <span className="fw-medium">Valor Total:</span> R${" "}
-              {data.venda.valor_total_venda.toFixed(2)}
+              <span className="fw-medium">Valor Total:</span> R$
+              {data.venda?.valor_total_venda?.toFixed(2)}
             </p>
           </div>
           <div className="col-12 col-md-6">
-            {data.venda.obs && (
+            {data.venda?.obs && (
               <p className="mb-2">
                 <span className="fw-medium">Observações:</span> {data.venda.obs}
               </p>
             )}
             <p>
-              <span className="fw-medium">Taxas:</span> R${" "}
-              {data.venda.taxas.toFixed(2)}
+              <span className="fw-medium">Taxas:</span> R$
+                {data.venda?.taxas?.toFixed(2)}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Botões abaixo */}
-      {/* Botões divididos em 100% da largura */}
+
       <div className="d-flex justify-content-between w-100 mt-3">
         <button className="btn btn-danger me-2" onClick={handleCancelSale}>
           <i className="bi bi-trash me-2"></i>
