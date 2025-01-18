@@ -39,12 +39,13 @@ export default function Sales() {
       const response = await api("/venda/vendas_finalizadas");
       const data = await response.json();
 
+      console.log("Data==>>", data)
       if (data && data.venda_finalizada && data.clientes && data.pedidos) {
         console.log("Clientes:", data.clientes);
         console.log("Vendas:", data.venda_finalizada);
         console.log("Pedidos:", data.pedidos);
         setSales(data.venda_finalizada);
-        setRequests(data.pedidos);
+        setRequests(data.pedidos);        
         setClients(data.clientes);
       } else {
         setErroMsg("Dados recebidos do servidor inválidos");
@@ -79,6 +80,8 @@ export default function Sales() {
       } else {
         if (data && data.venda_finalizada) {
           setSales(data.venda_finalizada);
+        setRequests(data.pedidos);        
+        setClients(data.clientes);
         } else {
           setErroMsg("Dados recebidos do servidor inválidos");
         }
