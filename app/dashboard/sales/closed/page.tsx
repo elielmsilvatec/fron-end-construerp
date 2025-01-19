@@ -39,13 +39,13 @@ export default function Sales() {
       const response = await api("/venda/vendas_finalizadas");
       const data = await response.json();
 
-      console.log("Data==>>", data)
+      console.log("Data==>>", data);
       if (data && data.venda_finalizada && data.clientes && data.pedidos) {
         console.log("Clientes:", data.clientes);
         console.log("Vendas:", data.venda_finalizada);
         console.log("Pedidos:", data.pedidos);
         setSales(data.venda_finalizada);
-        setRequests(data.pedidos);        
+        setRequests(data.pedidos);
         setClients(data.clientes);
       } else {
         setErroMsg("Dados recebidos do servidor inválidos");
@@ -80,8 +80,8 @@ export default function Sales() {
       } else {
         if (data && data.venda_finalizada) {
           setSales(data.venda_finalizada);
-        setRequests(data.pedidos);        
-        setClients(data.clientes);
+          setRequests(data.pedidos);
+          setClients(data.clientes);
         } else {
           setErroMsg("Dados recebidos do servidor inválidos");
         }
@@ -120,7 +120,7 @@ export default function Sales() {
       request.cliente_pedido === undefined
     ) {
       // return "Cliente não definido";
-       return "Cliente não informado"
+      return "Cliente não informado";
     }
     const client = clients.find((c) => c.id === request.cliente_pedido);
     console.log(
@@ -180,7 +180,8 @@ export default function Sales() {
           placeholder="Data Final"
         />
 
-        {isFiltered ? (
+        {/* quando estiver filtrado tinha a opção de limpar mais eu desativei / comentei */}
+        {/* {isFiltered ? (
           <button
             onClick={handleClearFilters}
             className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
@@ -196,7 +197,15 @@ export default function Sales() {
           >
             {loading ? "Carregando..." : "Filtrar"}
           </button>
-        )}
+        )} */}
+
+        <button
+          onClick={fetchFilteredData}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          disabled={loading}
+        >
+          {loading ? "Carregando..." : "Filtrar"}
+        </button>
       </div>
 
       {/* Lista de vendas */}
@@ -224,7 +233,10 @@ export default function Sales() {
                   }).format(sale.valor_total_venda)}
                 </p>
 
-                <a href={`/dashboard/sales/finalized/${sale.id_pedido}`} style={{ textDecoration: "none" }}>
+                <a
+                  href={`/dashboard/sales/finalized/${sale.id_pedido}`}
+                  style={{ textDecoration: "none" }}
+                >
                   <div className="flex items-center gap-2 cursor-pointer justify-center ">
                     <FullscreenIcon className="text-blue-500" />
                     <span className="text-blue-500">Vizualizar</span>
