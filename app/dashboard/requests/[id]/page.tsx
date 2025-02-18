@@ -10,45 +10,50 @@ import HandleFinalizeOrder from "@/components/resquests/handleFinalizeOrder";
 import HandleFinalizeSale from "@/components/resquests/handleFinalizeSale";
 import AddClientToOrder from "@/components/resquests/AddClientToOrder";
 
-
-
 interface Item {
   id: number;
   nome: string;
   undMedidas: string;
   marca: string;
-  quant_itens: string;
+  quant_itens: string; // Consider changing to number if possible
   total: number;
   valor_unitario: string;
   valor_compra: string;
   sub_total_itens: number;
 }
+
 interface Client {
-  // Renamed to singular for consistency
   id: number;
   nome: string;
   telefone: string;
-  cep: string; // Changed to string to handle potential leading zeros
+  cep: string;
   rua: string;
-  numero: number | string; // Allow for string if number is not always present
+  numero: number | string;
   bairro: string;
   cidade: string;
   observacoes: string;
 }
+
 const App = ({ params }: { params: Promise<{ id: number }> }) => {
   const [addClient, setAddClient] = useState(false);
-  // const [resquests, setRequests] = useState<Request[]>([]);
   const [requests, setRequests] = useState<number>(0);
   const [requestsClosed, setRequestsClosed] = useState<number>(0);
-  const [client, setClient] = useState<Client | null>(null); // Renamed to client, and improved type
+  const [client, setClient] = useState<Client | null>(null);
   const { id } = React.use(params);
   const router = useRouter();
   const [items, setItems] = useState<Item[]>([]);
   const [editQuantityId, setEditQuantityId] = useState<number | null>(null);
   const [editValueId, setEditValueId] = useState<number | null>(null);
   const [refreshItem, setRefreshItem] = useState(false);
-  const [searchTerm, setSearchTerm] = useState(""); // Estado compartilhado
-  const { control, handleSubmit, reset, getValues, setValue } = useForm<Item>({
+  const [searchTerm, setSearchTerm] = useState("");
+  const {
+    control,
+    handleSubmit,
+    reset,
+    getValues,
+    setValue,
+    formState: { errors },
+  } = useForm<Item>({
     defaultValues: {
       id: 0,
       nome: "",
@@ -87,10 +92,12 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
   const handleSaveQuantity = async () => {
     const updatedItem = getValues();
     try {
-      if (Number(updatedItem.quant_itens) <= 0) {
+      if (!updatedItem.quant_itens || Number(updatedItem.quant_itens) <= 0) {
         Swal.fire("Erro!", "Quantidade não pode ser zero ou vazia.", "error");
         return;
       }
+
+      const quantidade = updatedItem.quant_itens;
 
       await api("/pedido/editar/quant", {
         method: "POST",
@@ -100,7 +107,7 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
         body: JSON.stringify({
           id: updatedItem.id,
           IDpedido: id,
-          quant: updatedItem.quant_itens,
+          quant: quantidade,
         }),
       });
 
@@ -125,7 +132,7 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
         );
         return;
       }
-      const valorUnitario = updatedItem.valor_unitario.replace(".", ","); // Substitui a vírgula por ponto
+      const valorUnitario = updatedItem.valor_unitario.replace(".", ",");
 
       await api("/pedido/editar/valor_unitario", {
         method: "POST",
@@ -147,7 +154,6 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
     }
   };
 
-  // deletando item
   const handleDelete = async (itemId: number) => {
     try {
       const confirmation = await Swal.fire({
@@ -176,7 +182,7 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
       Swal.fire("Erro!", "Erro ao deletar item.", "error");
     }
   };
-  //  deletando pedido
+
   const handleDeleteOrder = async () => {
     try {
       const confirmation = await Swal.fire({
@@ -191,11 +197,6 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
       });
       if (confirmation.isConfirmed) {
         await api(`/pedido/delet/${id}`);
-        // setRefreshItem(!refreshItem);
-        // faz uma consulta a pedidos depois de excluir
-        const response = await api("/pedido/pedidos");
-        const data = await response.json();
-
         router.push("/dashboard/requests/list");
       }
     } catch (error) {
@@ -206,7 +207,6 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
 
   const handlePrintOrder = async () => {
     try {
-      // Faz uma requisição para a rota no backend
       let API_BASE_URL: string;
 
       if (process.env.NODE_ENV === "production") {
@@ -258,7 +258,6 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
     }
   };
 
-  // formatando em BRL
   const formatToBRL = (value: number): string => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -268,43 +267,36 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
 
   return (
     <>
-          <div className="mb-3">
+      <div className="mb-3">
         <button
           onClick={() => router.back()}
           className="btn btn-link text-decoration-none"
         >
           <ArrowLeft className="me-2" size={20} />
-          {/* Voltar */}
         </button>
       </div>
 
-      {/* se existe cliente mostra */}
       {client ? (
         <>
           <div className="card mb-3">
-            {" "}
             <div className="card-body position-relative">
-              {" "}
               <DeleteIcon
                 className="position-absolute top-0 end-0 m-2 cursor-pointer text-danger"
                 onClick={() => deleteClient()}
-              />{" "}
-              <h5 className="card-title">{client.nome}</h5>{" "}
+              />
+              <h5 className="card-title">{client.nome}</h5>
               <p className="card-text">
-                {" "}
-                <strong>Telefone:</strong> {client.telefone} {" "}
+                <strong>Telefone:</strong> {client.telefone}
                 <strong>Endereço:</strong> Rua {client.rua}, {client.numero}{" "}
-                {client.bairro}, {client.cidade} - {client.cep} <br />{" "}
-                <strong>Observações:</strong> {client.observacoes}{" "}
-              </p>{" "}
-            </div>{" "}
+                {client.bairro}, {client.cidade} - {client.cep} <br />
+                <strong>Observações:</strong> {client.observacoes}
+              </p>
+            </div>
           </div>
         </>
       ) : (
         <>
-          {/* se não existe cliente */}
           {addClient ? (
-            // Se addClient for true
             <>
               <button
                 type="button"
@@ -317,7 +309,6 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
               <br />
             </>
           ) : (
-            // Se addClient for false
             <>
               <button
                 type="button"
@@ -385,6 +376,13 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
                               {...field}
                               type="number"
                               className="form-control form-control-sm w-25"
+                              onChange={(e) => {
+                                // Manually trigger the change event to update the field value
+                                field.onChange(e);
+                                setValue("quant_itens", e.target.value, {
+                                  shouldValidate: true,
+                                }); // Update form value immediately
+                              }}
                             />
                           )}
                         />
@@ -416,6 +414,13 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
                               {...field}
                               type="number"
                               className="form-control form-control-sm w-25"
+                              onChange={(e) => {
+                                // Manually trigger the change event to update the field value
+                                field.onChange(e);
+                                setValue("valor_unitario", e.target.value, {
+                                  shouldValidate: true,
+                                }); // Update form value immediately
+                              }}
                             />
                           )}
                         />
@@ -462,14 +467,11 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
             </div>
           </div>
 
-          {/* Botões abaixo */}
-          {/* Botões divididos em 100% da largura */}
           <div className="d-flex justify-content-between w-100 mt-3">
             <button className="btn btn-danger me-2" onClick={handleDeleteOrder}>
               <i className="bi bi-trash me-2"></i>
               Deletar
             </button>
-            {/* se o valor total do pedido for maior que 0 mostra os botões */}
             {requests !== 0 && (
               <>
                 <button
@@ -479,8 +481,6 @@ const App = ({ params }: { params: Promise<{ id: number }> }) => {
                   <i className="bi bi-printer me-2"></i>
                   Imprimir Pedido
                 </button>
-
-                {/* se o pedido não estiver finalizado e valor */}
                 {requestsClosed !== 2 && <HandleFinalizeOrder id_pedido={id} />}
                 <HandleFinalizeSale id_pedido={id} />
               </>

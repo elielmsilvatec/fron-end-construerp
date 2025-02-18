@@ -91,6 +91,11 @@ const SalesItem = ({ params }: { params: Promise<{ id: number }> }) => {
     if (showDesconto) setShowDesconto(false);
   };
 
+  const formatCurrency = (value: string): number => {
+    const numericValue = parseFloat(value.replace(/\./g, '').replace(',', '.'));
+    return isNaN(numericValue) ? 0 : numericValue;
+  };
+
   const onSubmit = async (data: FormData) => {
     const pedidos = await api(`/pedido/ver/${id}`);
     const pedido = await pedidos.json();
@@ -100,22 +105,28 @@ const SalesItem = ({ params }: { params: Promise<{ id: number }> }) => {
     const IDvenda = venda.venda.id;
 
     const valor_total_pedido = pedido.pedido.valor_total_pedido;
-    // Aqui você enviaria os dados para a API
 
-    if (parseFloat(data.desconto) > pedido.pedido.valor_total_pedido * 0.25) {
+    const desconto = formatCurrency(data.desconto);
+    const taxas = formatCurrency(data.taxas);
+    const valorPago = formatCurrency(data.valorPago);
+
+    const valorFinalCalculado = valor_total_pedido - desconto + taxas;
+
+    if (desconto > valor_total_pedido * 0.25) {
       setErroMsg("O desconto não pode ser maior que 25% do valor da compra.");
       const timer = setTimeout(() => {
         setErroMsg(null);
       }, 4000);
-      return () => clearTimeout(timer); // Limpa o timer se o componente desmontar
+      return () => clearTimeout(timer);
     }
-    if (parseFloat(data.valorPago) < pedido.pedido.valor_total_pedido) {
-      setErroMsg("O valor pago não pode ser menor que o valor da compra.");
-      const timer = setTimeout(() => {
-        setErroMsg(null);
-      }, 4000);
-      return () => clearTimeout(timer); // Limpa o timer se o componente desmontar
-    }
+
+    if (valorPago < valorFinalCalculado) {
+        setErroMsg("O valor pago não pode ser menor que o valor final da compra.");
+        const timer = setTimeout(() => {
+          setErroMsg(null);
+        }, 4000);
+        return () => clearTimeout(timer);
+      }
 
     const lucro = venda.venda.lucro;
     const response = await api("/venda/pedido/finalizar", {
@@ -135,7 +146,6 @@ const SalesItem = ({ params }: { params: Promise<{ id: number }> }) => {
     const vendaFinalizada = await response.json();
     if (response.ok && response.status === 200) {
       if (Number(imprimir) === 1) {
-        // Faz uma requisição para a rota no backend
         let API_BASE_URL: string;
 
         if (process.env.NODE_ENV === "production") {
@@ -159,13 +169,13 @@ const SalesItem = ({ params }: { params: Promise<{ id: number }> }) => {
 
   // calcuando o troco
   const handleInputChange = (value: string) => {
-    const numericValue = parseFloat(value.replace(",", ".")); // Converte para número
+    const numericValue = formatCurrency(value); // Use a função formatCurrency
     setValorPago(isNaN(numericValue) ? null : numericValue);
   };
   // calcula valor final
   useEffect(() => {
-    const desconto = parseFloat(getValues("desconto").replace(",", ".")) || 0;
-    const taxas = parseFloat(getValues("taxas").replace(",", ".")) || 0;
+    const desconto = formatCurrency(getValues("desconto"));
+    const taxas = formatCurrency(getValues("taxas"));
 
     const novoValorFinal = valorPedido ? valorPedido - desconto + taxas : 0;
     setValorFinal(novoValorFinal);
@@ -173,12 +183,12 @@ const SalesItem = ({ params }: { params: Promise<{ id: number }> }) => {
 
   // Atualiza o troco automaticamente sempre que o valor pago ou pedido mudar
   useEffect(() => {
-    if (valorPedido !== null && valorPago !== null) {
-      setTroco(valorPago - valorPedido);
+    if (valorFinal !== null && valorPago !== null) {
+      setTroco(valorPago - valorFinal);
     } else {
       setTroco(null); // Define como nulo se algum dos valores for inválido
     }
-  }, [valorPago, valorPedido]);
+  }, [valorPago, valorFinal]);
 
   return (
     <div className="row">
@@ -266,6 +276,9 @@ const SalesItem = ({ params }: { params: Promise<{ id: number }> }) => {
                       errors.desconto ? "is-invalid" : ""
                     }`}
                     placeholder="Desconto"
+                    onChange={(e) => {
+                      field.onChange(e);
+                    }}
                   />
                 )}
               />
@@ -292,6 +305,9 @@ const SalesItem = ({ params }: { params: Promise<{ id: number }> }) => {
                       errors.taxas ? "is-invalid" : ""
                     }`}
                     placeholder="Taxas"
+                    onChange={(e) => {
+                      field.onChange(e);
+                    }}
                   />
                 )}
               />
@@ -364,8 +380,8 @@ const SalesItem = ({ params }: { params: Promise<{ id: number }> }) => {
                   }`}
                   placeholder="Valor pago"
                   onChange={(e) => {
-                    field.onChange(e); // Mantém o controle do react-hook-form
-                    handleInputChange(e.target.value); // Atualiza o estado local
+                    field.onChange(e);
+                    handleInputChange(e.target.value);
                   }}
                 />
               )}
