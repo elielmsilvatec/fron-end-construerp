@@ -124,42 +124,43 @@ const Finalized = ({ params }: { params: Promise<{ id: number }> }) => {
     );
   }
 
-  const handleCancelSale = async () => {
+  const handleCloseDelivery = async () => {
     const confirmation = await Swal.fire({
       title: "Tem certeza?",
       text: "Esta ação não pode ser desfeita.",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Sim, deletar!",
+      confirmButtonText: "Marcar como entregue",
       cancelButtonText: "Cancelar",
-      confirmButtonColor: "#d33",
+      confirmButtonColor: "#4CAF50",
       cancelButtonColor: "#3085d6",
     });
+
     if (confirmation.isConfirmed) {
-      const confirmation = await Swal.fire({
-        title: "Você tem certeza que deseja deletar a venda?",
-        text: "Sua venda será deletada permanentemente.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Sim, deletar!",
-        cancelButtonText: "Cancelar",
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
+      const response = await api(`/entrega/entregue`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id_venda: data.venda.id }),
       });
-      if (confirmation.isConfirmed) {
-        const response = await api(`/vendas/deletar/${data.venda?.id}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ id_pedido: id }),
+
+      console.log(response);
+      if (response.ok && response.status === 200) {
+        await Swal.fire({
+          title: "Atualizado!",
+          text: "Entrega finalizada com sucesso!",
+          icon: "success",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#4CAF50",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Redirecionar para /dashboard/deliveries
+            window.location.href = "/dashboard/deliveries";
+          }
         });
-        if (response.ok) {
-          Swal.fire("Deletado!", "Venda deletada com sucesso!", "success");
-          router.back();
-        } else {
-          Swal.fire("Erro!", "Erro ao deletar Venda.", "error");
-        }
+      } else {
+        Swal.fire("Erro!", "Erro ao finalizar entrega.", "error");
       }
     }
   };
@@ -186,36 +187,24 @@ const Finalized = ({ params }: { params: Promise<{ id: number }> }) => {
         </button>
       </div>
 
-      {/* Status da entrega */}
-      <div>
-        <h6 className="fs-4 fw-semibold text-secondary mb-3 d-flex align-items-center">
-          Entrega:
-          <div
-            className={`ms-2 ${
-              data.venda.entrega === 0
-                ? "text-info" // Cor para "Retirada na Loja"
-                : data.venda.entrega === 1
-                ? "text-warning" // Cor para "Pendente"
-                : "text-success" // Cor para "Entregue"
-            }`}
-          >
-            {data.venda.entrega === 0 ? (
-              <>
-                <i className="bi bi-shop me-1"></i> Retirada na Loja
-              </>
-            ) : data.venda.entrega === 1 ? (
-              <>
-                <i className="bi bi-exclamation-triangle-fill me-1"></i>{" "}
-                Pendente de entrega
-              </>
-            ) : (
-              <>
-                <i className="bi bi-check-circle-fill me-1"></i> Entrega realizada
-              </>
-            )}
-          </div>
-        </h6>
-      </div>
+      <h3 className="fs-4 fw-semibold text-secondary mb-3 d-flex align-items-center">
+        Status da entrega:
+        <div
+          className={`ms-2 ${
+            data.venda.entrega === 1 ? "text-warning" : "text-success"
+          }`}
+        >
+          {data.venda.entrega === 1 ? (
+            <>
+              <i className="bi bi-exclamation-triangle-fill me-1"></i> Pendente
+            </>
+          ) : (
+            <>
+              <i className="bi bi-check-circle-fill me-1"></i> Entregue
+            </>
+          )}
+        </div>
+      </h3>
 
       <div className="bg-white shadow-sm rounded-3 p-4 mb-4">
         <h2 className="fs-4 fw-semibold text-secondary mb-3 d-flex align-items-center">
@@ -411,10 +400,15 @@ const Finalized = ({ params }: { params: Promise<{ id: number }> }) => {
       </div>
 
       <div className="d-flex justify-content-between w-100 mt-3">
-        <button className="btn btn-danger me-2" onClick={handleCancelSale}>
-          <i className="bi bi-trash me-2"></i>
-          Deletar
-        </button>
+        {data.venda.entrega === 1 && (
+          <button
+            className="btn btn-success me-2"
+            onClick={handleCloseDelivery}
+          >
+            <i className="bi bi-check-circle me-2"></i>
+            Marcar como Entregue
+          </button>
+        )}
 
         <>
           <button className="btn btn-secondary me-2" onClick={handlePrintSale}>
